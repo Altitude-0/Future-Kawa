@@ -1,0 +1,91 @@
+spring:
+  application:
+    name: futurekawa-backend-core
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/futurekawa_core
+    username: ${DB_USER:postgres}
+    password: ${DB_PASSWORD:secret}
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 2
+
+  jpa:
+    hibernate:
+      ddl-auto: none
+    properties:
+      hibernate:
+        format_sql: true
+
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    baselineOnMigrate: true
+
+  mail:
+    host: ${MAIL_HOST:smtp.gmail.com}
+    port: ${MAIL_PORT:587}
+    username: ${MAIL_USERNAME}
+    password: ${MAIL_PASSWORD}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
+mqtt:
+  broker-url: tcp://localhost:1883
+  client-id: futurekawa-core
+  topics:
+    sensor-data: futurekawa/sensors/measures
+
+server:
+  port: 8080
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      show-details: always
+      livenessState:
+        enabled: true
+      readinessState:
+        enabled: true
+  health:
+    mail:
+      enabled: false
+
+springdoc:
+  swagger-ui:
+    enabled: true
+    path: /swagger-ui.html
+    operationsSorter: method
+    tagsSorter: alpha
+    use-root-path: true
+  api-docs:
+    path: /v3/api-docs
+  use-management-port: false
+  show-actuator: false
+
+logging:
+  level:
+    root: INFO
+    com.futurekawa: DEBUG
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} - %logger{36} - %msg%n"
+
+# FutureKawa Custom Configuration
+futurekawa:
+  country: ${COUNTRY:generic}
+  temperatureIdeal: ${TEMPERATURE_IDEAL:28.0}
+  humidityIdeal: ${HUMIDITY_IDEAL:60.0}
+  temperatureTolerance: ${TEMPERATURE_TOLERANCE:3.0}
+  humidityTolerance: ${HUMIDITY_TOLERANCE:2.0}
+  alertOldLotDays: ${ALERT_OLD_LOT_DAYS:365}
+  jwt:
+    secret: ${JWT_SECRET:futurekawa-secret-key-for-jwt-token-generation-and-validation-2024}
+    expiration: ${JWT_EXPIRATION:86400000}
