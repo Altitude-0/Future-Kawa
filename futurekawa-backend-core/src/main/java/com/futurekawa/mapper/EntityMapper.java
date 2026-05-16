@@ -1,13 +1,7 @@
 package com.futurekawa.mapper;
 
-import com.futurekawa.dto.AlertDTO;
-import com.futurekawa.dto.MeasurementDTO;
-import com.futurekawa.dto.StockDTO;
-import com.futurekawa.dto.WarehouseDTO;
-import com.futurekawa.entity.Alert;
-import com.futurekawa.entity.Measurement;
-import com.futurekawa.entity.Stock;
-import com.futurekawa.entity.Warehouse;
+import com.futurekawa.dto.*;
+import com.futurekawa.entity.*;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -70,6 +64,54 @@ public class EntityMapper {
             .description(alert.getDescription())
             .emailSent(alert.getEmailSent())
             .createdAt(alert.getCreatedAt())
+            .build();
+    }
+
+    public ConfigurationDTO toConfigurationDTO(Configuration config) {
+        if (config == null) {
+            return null;
+        }
+        return ConfigurationDTO.builder()
+            .id(config.getId())
+            .countryCode(config.getCountry() != null ? config.getCountry().getCode() : null)
+            .temperatureIdeal(config.getTemperatureIdeal())
+            .humidityIdeal(config.getHumidityIdeal())
+            .temperatureTolerance(config.getTemperatureTolerance())
+            .humidityTolerance(config.getHumidityTolerance())
+            .temperatureUnit(config.getTemperatureUnit().toString())
+            .alertOldLotDays(config.getAlertOldLotDays())
+            .createdAt(config.getCreatedAt())
+            .updatedAt(config.getUpdatedAt())
+            .build();
+    }
+
+    public Configuration toConfigurationEntity(ConfigurationDTO dto, Country country) {
+        if (dto == null) {
+            return null;
+        }
+        return Configuration.builder()
+            .id(dto.getId())
+            .country(country)
+            .temperatureIdeal(dto.getTemperatureIdeal())
+            .humidityIdeal(dto.getHumidityIdeal())
+            .temperatureTolerance(dto.getTemperatureTolerance())
+            .humidityTolerance(dto.getHumidityTolerance())
+            .temperatureUnit(Configuration.TemperatureUnit.valueOf(dto.getTemperatureUnit()))
+            .alertOldLotDays(dto.getAlertOldLotDays())
+            .build();
+    }
+
+    public ConfigurationAuditDTO toConfigurationAuditDTO(ConfigurationAudit audit) {
+        if (audit == null) {
+            return null;
+        }
+        return ConfigurationAuditDTO.builder()
+            .id(audit.getId())
+            .fieldName(audit.getFieldName())
+            .oldValue(audit.getOldValue())
+            .newValue(audit.getNewValue())
+            .changedBy(audit.getUser() != null ? audit.getUser().getUsername() : null)
+            .changedAt(audit.getChangedAt())
             .build();
     }
 }

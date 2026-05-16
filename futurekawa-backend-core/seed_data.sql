@@ -14,10 +14,10 @@ INSERT INTO users (id, username, email, password, first_name, last_name, role, e
 -- =====================================================
 -- 2. ENTREPÔTS (Warehouses)
 -- =====================================================
-INSERT INTO warehouses (id, name, ideal_temperature, ideal_humidity, tolerance_temperature, tolerance_humidity) VALUES
-('d1234567-89ab-cdef-0123-456789abcdef', 'Entrepôt São Paulo', 22.0, 60.0, 3.0, 2.0),
-('e1234567-89ab-cdef-0123-456789abcdef', 'Entrepôt Medellin', 20.0, 55.0, 3.0, 2.0),
-('f1234567-89ab-cdef-0123-456789abcdef', 'Entrepôt Quito', 18.0, 65.0, 3.0, 2.0);
+INSERT INTO warehouses (id, name, country_id, ideal_temperature, ideal_humidity, tolerance_temperature, tolerance_humidity) VALUES
+('d1234567-89ab-cdef-0123-456789abcdef', 'Entrepôt São Paulo', (SELECT id FROM countries WHERE code = 'BR'), 22.0, 60.0, 3.0, 2.0),
+('e1234567-89ab-cdef-0123-456789abcdef', 'Entrepôt Medellin', (SELECT id FROM countries WHERE code = 'CO'), 20.0, 55.0, 3.0, 2.0),
+('f1234567-89ab-cdef-0123-456789abcdef', 'Entrepôt Quito', (SELECT id FROM countries WHERE code = 'EC'), 18.0, 65.0, 3.0, 2.0);
 
 -- =====================================================
 -- 3. STOCKS (Lots de café)

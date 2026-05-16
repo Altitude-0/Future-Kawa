@@ -6,7 +6,17 @@
 -- de clés étrangères (supprimer d'abord les tables dépendantes)
 
 -- =====================================================
--- 1. Supprimer les ALERTES (dépendent des stocks)
+-- 1. Supprimer les AUDITS de CONFIGURATION (dépendent des configurations)
+-- =====================================================
+DELETE FROM configuration_audits;
+
+-- =====================================================
+-- 2. Supprimer les CONFIGURATIONS (dépendent des countries)
+-- =====================================================
+DELETE FROM configurations;
+
+-- =====================================================
+-- 3. Supprimer les ALERTES (dépendent des stocks)
 -- =====================================================
 DELETE FROM alerts
 WHERE stock_id IN (
@@ -19,7 +29,7 @@ WHERE stock_id IN (
 );
 
 -- =====================================================
--- 2. Supprimer les MESURES (dépendent des stocks)
+-- 4. Supprimer les MESURES (dépendent des stocks)
 -- =====================================================
 DELETE FROM measurements
 WHERE stock_id IN (
@@ -32,7 +42,7 @@ WHERE stock_id IN (
 );
 
 -- =====================================================
--- 3. Supprimer les STOCKS (dépendent des warehouses)
+-- 5. Supprimer les STOCKS (dépendent des warehouses)
 -- =====================================================
 DELETE FROM stocks
 WHERE warehouse_id IN (
@@ -42,7 +52,7 @@ WHERE warehouse_id IN (
 );
 
 -- =====================================================
--- 4. Supprimer les ENTREPÔTS
+-- 6. Supprimer les ENTREPÔTS
 -- =====================================================
 DELETE FROM warehouses
 WHERE id IN (
@@ -52,7 +62,7 @@ WHERE id IN (
 );
 
 -- =====================================================
--- 5. Supprimer les UTILISATEURS
+-- 7. Supprimer les UTILISATEURS
 -- =====================================================
 DELETE FROM users
 WHERE id IN (
@@ -60,6 +70,12 @@ WHERE id IN (
     'b1234567-89ab-cdef-0123-456789abcdef',
     'c1234567-89ab-cdef-0123-456789abcdef'
 );
+
+-- =====================================================
+-- 8. Supprimer les PAYS (dépendances maintenant vides)
+-- =====================================================
+DELETE FROM countries
+WHERE code IN ('BR', 'EC', 'CO');
 
 -- =====================================================
 -- Vérification finale
@@ -72,4 +88,6 @@ SELECT 'Stocks restants', COUNT(*) FROM stocks
 UNION ALL
 SELECT 'Mesures restantes', COUNT(*) FROM measurements
 UNION ALL
-SELECT 'Alertes restantes', COUNT(*) FROM alerts;
+SELECT 'Alertes restantes', COUNT(*) FROM alerts
+UNION ALL
+SELECT 'Pays restants', COUNT(*) FROM countries;

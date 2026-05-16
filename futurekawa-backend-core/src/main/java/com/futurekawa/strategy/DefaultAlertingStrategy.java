@@ -2,9 +2,11 @@ package com.futurekawa.strategy;
 
 import com.futurekawa.config.FuturekawaProperties;
 import com.futurekawa.entity.Alert;
+import com.futurekawa.entity.Configuration;
 import com.futurekawa.entity.Measurement;
 import com.futurekawa.entity.Stock;
 import com.futurekawa.repository.MeasurementRepository;
+import com.futurekawa.service.ConfigurationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -16,7 +18,8 @@ import java.util.Optional;
 
 /**
  * Default alerting strategy implementation.
- * Uses FuturekawaProperties for country-specific thresholds.
+ * Uses ConfigurationService for dynamic country-specific thresholds.
+ * Falls back to FuturekawaProperties if configuration not found.
  * Can be overridden by country/region-specific implementations.
  */
 @Component
@@ -24,20 +27,25 @@ import java.util.Optional;
 public class DefaultAlertingStrategy implements AlertingStrategy {
 
     private final MeasurementRepository measurementRepository;
+    private final ConfigurationService configurationService;
     private final FuturekawaProperties properties;
 
     @Override
     public List<Alert> evaluateAlerts(Stock stock) {
         List<Alert> alerts = new ArrayList<>();
 
+        // Retrieve dynamic configuration for the stock's country
+        String countryCode = stock.getWarehouse().getCountry().getCode();
+        Configuration config = configurationService.getConfiguration(countryCode);
+
         // Check 1: Stock expiry
         long daysInStorage = ChronoUnit.DAYS.between(stock.getCreatedAt(), LocalDateTime.now());
-        if (daysInStorage > properties.getAlertOldLotDays()) {
+        if (daysInStorage > config.getAlertOldLotDays()) {
             Alert expiryAlert = Alert.builder()
                 .stock(stock)
                 .alertedAt(LocalDateTime.now())
                 .type(Alert.AlertType.EXPIRED_STOCK)
-                .description(String.format("Stock stored for %d days (expiry: %d days)", daysInStorage, properties.getAlertOldLotDays()))
+                .description(String.format("Stock stored for %d days (expiry: %d days)", daysInStorage, config.getAlertOldLotDays()))
                 .emailSent(false)
                 .build();
             alerts.add(expiryAlert);
@@ -47,10 +55,10 @@ public class DefaultAlertingStrategy implements AlertingStrategy {
         Optional<Measurement> latestMeasurement = measurementRepository.findLatestByStockId(stock.getId());
         if (latestMeasurement.isPresent()) {
             Measurement measurement = latestMeasurement.get();
-            Float tempIdeal = getIdealTemperature();
-            Float humidityIdeal = getIdealHumidity();
-            Float tempTolerance = getTemperanceTolerance();
-            Float humidityTolerance = getHumidityTolerance();
+            Float tempIdeal = config.getTemperatureIdeal();
+            Float humidityIdeal = config.getHumidityIdeal();
+            Float tempTolerance = config.getTemperatureTolerance();
+            Float humidityTolerance = config.getHumidityTolerance();
 
             boolean tempOutOfRange = Math.abs(measurement.getTemperature() - tempIdeal) > tempTolerance;
             boolean humidityOutOfRange = Math.abs(measurement.getHumidity() - humidityIdeal) > humidityTolerance;
@@ -74,6 +82,10 @@ public class DefaultAlertingStrategy implements AlertingStrategy {
         return alerts;
     }
 
+    /**
+     * Fallback methods returning default properties values.
+     * These are only used if evaluateAlerts cannot retrieve configuration.
+     */
     @Override
     public Float getIdealTemperature() {
         return properties.getTemperatureIdeal();

@@ -20,6 +20,10 @@ public class Warehouse {
     @Column(nullable = false, length = 100)
     private String name;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "country_id", nullable = false)
+    private Country country;
+
     @Column(nullable = false)
     private Float idealTemperature;
 

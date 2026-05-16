@@ -40,8 +40,8 @@ services:
   # Backend Core Spring Boot Application
   backend:
     build:
-      context: .
-      dockerfile: Dockerfile
+      context: ..
+      dockerfile: futurekawa-backend-core/Dockerfile
     container_name: futurekawa-backend-core
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/futurekawa_core
