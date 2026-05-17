@@ -7,7 +7,7 @@
 
     <groupId>com.futurekawa</groupId>
     <artifactId>futurekawa-parent</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.0-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>FutureKawa Parent</name>
     <description>Parent POM for FutureKawa microservices architecture</description>
@@ -97,4 +97,12 @@
             </dependency>
         </dependencies>
     </dependencyManagement>
+
+    <distributionManagement>
+        <repository>
+            <id>github</id>
+            <name>GitHub Packages</name>
+            <url>https://maven.pkg.github.com/Altitude-0/Future-Kawa</url>
+        </repository>
+    </distributionManagement>
 </project>
