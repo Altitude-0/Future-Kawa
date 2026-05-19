@@ -69,3 +69,38 @@ jobs:
 
       - name: Push Docker image
         run: docker push ${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER_LOWER }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+
+  notify-discord:
+    needs: [build-and-test, deploy-maven, build-and-push]
+    runs-on: ubuntu-latest
+    name: Notify Discord
+    if: success()
+    steps:
+      - name: Send Discord notification
+        run: |
+          curl -X POST ${{ secrets.DISCORD_WEBHOOK_URL }} \
+            -H 'Content-Type: application/json' \
+            -d '{
+              "content": "✅ FutureKawa Pipeline Succeeded!",
+              "embeds": [{
+                "title": "Build & Deploy Success",
+                "description": "Commit: `${{ github.sha }}`\nBranch: `${{ github.ref }}`",
+                "color": 3066993,
+                "fields": [
+                  {
+                    "name": "Repository",
+                    "value": "${{ github.repository }}",
+                    "inline": true
+                  },
+                  {
+                    "name": "Actor",
+                    "value": "${{ github.actor }}",
+                    "inline": true
+                  }
+                ],
+                "footer": {
+                  "text": "GitHub Actions"
+                },
+                "timestamp": "'$(date -u +%Y-%m-%dT%H:%M:%SZ)'"
+              }]
+            }'
