@@ -16,7 +16,5 @@ public class MeasurementDTO {
     private UUID stockId;
     private LocalDateTime measuredAt;
     private Float temperature;
-    private Float humidity;
-    private String sensorId;
     private LocalDateTime createdAt;
 }

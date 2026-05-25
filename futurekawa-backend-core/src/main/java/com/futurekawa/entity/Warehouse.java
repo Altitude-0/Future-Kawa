@@ -28,13 +28,7 @@ public class Warehouse {
     private Float idealTemperature;
 
     @Column(nullable = false)
-    private Float idealHumidity;
-
-    @Column(nullable = false)
     private Float toleranceTemperature;
-
-    @Column(nullable = false)
-    private Float toleranceHumidity;
 
     @OneToMany(mappedBy = "warehouse", cascade = CascadeType.ALL)
     private List<Stock> stocks;

@@ -18,11 +18,7 @@ public class ConfigurationDTO {
 
     private Float temperatureIdeal;
 
-    private Float humidityIdeal;
-
     private Float temperatureTolerance;
-
-    private Float humidityTolerance;
 
     @JsonProperty("temperatureUnit")
     private String temperatureUnit;
