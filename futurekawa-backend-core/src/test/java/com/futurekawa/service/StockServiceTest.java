@@ -41,9 +41,7 @@ class StockServiceTest {
             .id(UUID.randomUUID())
             .name("Test Warehouse")
             .idealTemperature(22.0f)
-            .idealHumidity(60.0f)
             .toleranceTemperature(3.0f)
-            .toleranceHumidity(2.0f)
             .build();
 
         testStock = Stock.builder()

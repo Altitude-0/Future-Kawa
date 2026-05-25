@@ -56,22 +56,18 @@ public class DefaultAlertingStrategy implements AlertingStrategy {
         if (latestMeasurement.isPresent()) {
             Measurement measurement = latestMeasurement.get();
             Float tempIdeal = config.getTemperatureIdeal();
-            Float humidityIdeal = config.getHumidityIdeal();
             Float tempTolerance = config.getTemperatureTolerance();
-            Float humidityTolerance = config.getHumidityTolerance();
 
             boolean tempOutOfRange = Math.abs(measurement.getTemperature() - tempIdeal) > tempTolerance;
-            boolean humidityOutOfRange = Math.abs(measurement.getHumidity() - humidityIdeal) > humidityTolerance;
 
-            if (tempOutOfRange || humidityOutOfRange) {
+            if (tempOutOfRange) {
                 Alert conditionAlert = Alert.builder()
                     .stock(stock)
                     .alertedAt(LocalDateTime.now())
                     .type(Alert.AlertType.CONDITION_OUT_OF_RANGE)
                     .description(String.format(
-                        "Conditions out of range: T=%.1f°C (ideal %.1f±%.1f), H=%.1f%% (ideal %.1f±%.1f)",
-                        measurement.getTemperature(), tempIdeal, tempTolerance,
-                        measurement.getHumidity(), humidityIdeal, humidityTolerance
+                        "Temperature out of range: %.1f°C (ideal %.1f±%.1f)",
+                        measurement.getTemperature(), tempIdeal, tempTolerance
                     ))
                     .emailSent(false)
                     .build();
