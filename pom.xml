@@ -35,8 +35,8 @@
         <testcontainers.version>1.19.0</testcontainers.version>
         <eclipse-paho.version>1.2.5</eclipse-paho.version>
         <sonar.host.url>https://sonarcloud.io</sonar.host.url>
-        <sonar.organization>REMPLACE_PAR_TON_ORG_SONAR</sonar.organization>
-        <sonar.projectKey>REMPLACE_PAR_PROJECT_KEY</sonar.projectKey>
+        <sonar.organization>altitude-0</sonar.organization>
+        <sonar.projectKey>Altitude-0_Future-Kawa</sonar.projectKey>
     </properties>
 
     <dependencyManagement>

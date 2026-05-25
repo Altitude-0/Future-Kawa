@@ -38,8 +38,8 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
           mvn sonar:sonar \
-            -Dsonar.projectKey=REMPLACE_PROJECT_KEY \
-            -Dsonar.organization=REMPLACE_ORGANIZATION_KEY \
+            -Dsonar.projectKey=Altitude-0_Future-Kawa \
+            -Dsonar.organization=altitude-0 \
             -Dsonar.host.url=https://sonarcloud.io \
             -Dsonar.token=${{ secrets.SONAR_TOKEN }}
   deploy-maven:
