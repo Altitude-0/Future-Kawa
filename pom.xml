@@ -21,6 +21,7 @@
 
     <modules>
         <module>futurekawa-backend-core</module>
+        <module>futurekawa-mqtt-service</module>
     </modules>
 
     <properties>
