@@ -1,0 +1,22 @@
+spring:
+  application:
+    name: futurekawa-mqtt-service
+  rabbitmq:
+    host: ${RABBITMQ_HOST:rabbitmq}
+    port: ${RABBITMQ_PORT:5672}
+    username: ${RABBITMQ_USER:guest}
+    password: ${RABBITMQ_PASSWORD:guest}
+
+mqtt:
+  broker: ${MQTT_BROKER:tcp://mosquitto:1883}
+  client-id: ${MQTT_CLIENT_ID:futurekawa-mqtt-service}
+
+server:
+  port: 8081
+
+logging:
+  level:
+    com.futurekawa: DEBUG
+    org.springframework.integration: DEBUG
+    org.springframework.integration.mqtt: DEBUG
+    org.eclipse.paho: DEBUG
