@@ -34,6 +34,9 @@
         <springdoc.version>2.0.2</springdoc.version>
         <testcontainers.version>1.19.0</testcontainers.version>
         <eclipse-paho.version>1.2.5</eclipse-paho.version>
+        <sonar.host.url>https://sonarcloud.io</sonar.host.url>
+        <sonar.organization>REMPLACE_PAR_TON_ORG_SONAR</sonar.organization>
+        <sonar.projectKey>REMPLACE_PAR_PROJECT_KEY</sonar.projectKey>
     </properties>
 
     <dependencyManagement>
@@ -97,6 +100,43 @@
             </dependency>
         </dependencies>
     </dependencyManagement>
+
+    <build>
+        <pluginManagement>
+            <plugins>
+
+                <!-- JaCoCo : génération du rapport de couverture de tests -->
+                <plugin>
+                    <groupId>org.jacoco</groupId>
+                    <artifactId>jacoco-maven-plugin</artifactId>
+                    <version>0.8.12</version>
+                    <executions>
+                        <execution>
+                            <goals>
+                                <goal>prepare-agent</goal>
+                            </goals>
+                        </execution>
+
+                        <execution>
+                            <id>report</id>
+                            <phase>verify</phase>
+                            <goals>
+                                <goal>report</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
+
+                <!-- Sonar Maven Scanner -->
+                <plugin>
+                    <groupId>org.sonarsource.scanner.maven</groupId>
+                    <artifactId>sonar-maven-plugin</artifactId>
+                    <version>3.11.0.3922</version>
+                </plugin>
+
+            </plugins>
+        </pluginManagement>
+    </build>
 
     <distributionManagement>
         <repository>
