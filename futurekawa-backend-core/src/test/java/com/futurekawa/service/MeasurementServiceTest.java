@@ -57,8 +57,6 @@ class MeasurementServiceTest {
             .stock(testStock)
             .measuredAt(LocalDateTime.now())
             .temperature(22.5f)
-            .humidity(60.0f)
-            .sensorId("SENSOR-001")
             .createdAt(LocalDateTime.now())
             .build();
     }
@@ -72,8 +70,6 @@ class MeasurementServiceTest {
         assertThat(result).isNotNull();
         assertThat(result.getId()).isEqualTo(testId);
         assertThat(result.getTemperature()).isEqualTo(22.5f);
-        assertThat(result.getHumidity()).isEqualTo(60.0f);
-        assertThat(result.getSensorId()).isEqualTo("SENSOR-001");
         verify(measurementRepository, times(1)).save(any(Measurement.class));
     }
 
@@ -106,8 +102,6 @@ class MeasurementServiceTest {
             .stock(testStock)
             .measuredAt(LocalDateTime.now())
             .temperature(23.0f)
-            .humidity(61.0f)
-            .sensorId("SENSOR-002")
             .build();
 
         List<Measurement> measurements = Arrays.asList(testMeasurement, measurement2);
@@ -139,8 +133,6 @@ class MeasurementServiceTest {
             .stock(testStock)
             .measuredAt(LocalDateTime.now())
             .temperature(23.5f)
-            .humidity(61.0f)
-            .sensorId("SENSOR-001-UPDATED")
             .createdAt(testMeasurement.getCreatedAt())
             .build();
 
@@ -151,7 +143,6 @@ class MeasurementServiceTest {
 
         assertThat(result).isNotNull();
         assertThat(result.getTemperature()).isEqualTo(23.5f);
-        assertThat(result.getSensorId()).isEqualTo("SENSOR-001-UPDATED");
         verify(measurementRepository, times(1)).findById(testId);
         verify(measurementRepository, times(1)).save(any(Measurement.class));
     }

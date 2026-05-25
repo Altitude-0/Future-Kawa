@@ -5,10 +5,7 @@ import lombok.*;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-/**
- * Configuration entity representing country-specific settings for temperature, humidity, and alerting.
- * Each country (BR, EC, CO) has exactly one configuration record with ideal values and tolerances.
- */
+// Configuration entity representing country-specific temperature settings and alerting
 @Entity
 @Table(name = "configurations")
 @Data
@@ -28,14 +25,8 @@ public class Configuration {
     @Column(name = "temperature_ideal", nullable = false)
     private Float temperatureIdeal;
 
-    @Column(name = "humidity_ideal", nullable = false)
-    private Float humidityIdeal;
-
     @Column(name = "temperature_tolerance", nullable = false)
     private Float temperatureTolerance;
-
-    @Column(name = "humidity_tolerance", nullable = false)
-    private Float humidityTolerance;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "temperature_unit", nullable = false)

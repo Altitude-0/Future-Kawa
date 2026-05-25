@@ -70,17 +70,9 @@ public class ConfigurationService {
             String.valueOf(current.getTemperatureIdeal()),
             String.valueOf(newConfig.getTemperatureIdeal()));
 
-        auditIfChanged(current, newConfig, updatingUser, "humidityIdeal",
-            String.valueOf(current.getHumidityIdeal()),
-            String.valueOf(newConfig.getHumidityIdeal()));
-
         auditIfChanged(current, newConfig, updatingUser, "temperatureTolerance",
             String.valueOf(current.getTemperatureTolerance()),
             String.valueOf(newConfig.getTemperatureTolerance()));
-
-        auditIfChanged(current, newConfig, updatingUser, "humidityTolerance",
-            String.valueOf(current.getHumidityTolerance()),
-            String.valueOf(newConfig.getHumidityTolerance()));
 
         auditIfChanged(current, newConfig, updatingUser, "temperatureUnit",
             current.getTemperatureUnit().toString(),
@@ -92,9 +84,7 @@ public class ConfigurationService {
 
         // Update current with new values
         current.setTemperatureIdeal(newConfig.getTemperatureIdeal());
-        current.setHumidityIdeal(newConfig.getHumidityIdeal());
         current.setTemperatureTolerance(newConfig.getTemperatureTolerance());
-        current.setHumidityTolerance(newConfig.getHumidityTolerance());
         current.setTemperatureUnit(newConfig.getTemperatureUnit());
         current.setAlertOldLotDays(newConfig.getAlertOldLotDays());
         current.setUpdatedAt(LocalDateTime.now());
@@ -162,16 +152,11 @@ public class ConfigurationService {
         return auditRepository.findByConfigurationIdOrderByChangedAtDesc(configurationId);
     }
 
-    /**
-     * Build default configuration from application.yaml properties if not found in DB.
-     */
     private Configuration buildDefaultConfiguration(Country country) {
         return Configuration.builder()
             .country(country)
             .temperatureIdeal(defaultProperties.getTemperatureIdeal())
-            .humidityIdeal(defaultProperties.getHumidityIdeal())
             .temperatureTolerance(defaultProperties.getTemperatureTolerance())
-            .humidityTolerance(defaultProperties.getHumidityTolerance())
             .temperatureUnit(Configuration.TemperatureUnit.CELSIUS)
             .alertOldLotDays(defaultProperties.getAlertOldLotDays().intValue())
             .build();

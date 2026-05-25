@@ -31,12 +31,6 @@ public class Measurement {
     @Column(nullable = false)
     private Float temperature;
 
-    @Column(nullable = false)
-    private Float humidity;
-
-    @Column(name = "sensor_id", length = 50)
-    private String sensorId;
-
     @Column(name = "created_at", nullable = false, updatable = false)
     @Builder.Default
     private LocalDateTime createdAt = LocalDateTime.now();
