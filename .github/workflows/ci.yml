@@ -15,10 +15,12 @@ env:
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
-    name: Build & Test
+    name: Build, Test & SonarCloud
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Set up JDK 17
         uses: actions/setup-java@v4
@@ -27,9 +29,19 @@ jobs:
           distribution: temurin
           cache: maven
 
-      - name: Build and run tests
-        run: mvn clean test
+      # - name: Build and run tests with coverage
+      #   run: mvn clean verify
 
+      - name: Build, test and SonarCloud analysis
+          env:
+            SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          run: |
+            mvn clean verify sonar:sonar \
+              -Dsonar.projectKey=Altitude-0_Future-Kawa \
+              -Dsonar.organization=altitude-0 \
+              -Dsonar.host.url=https://sonarcloud.io \
+              -Dsonar.token=${{ secrets.SONAR_TOKEN }}
+              -Dsonar.coverage.jacoco.xmlReportPaths=futurekawa-backend-core/target/site/jacoco/jacoco.xml
   deploy-maven:
     needs: build-and-test
     runs-on: ubuntu-latest

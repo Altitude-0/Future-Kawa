@@ -155,6 +155,11 @@
                 <artifactId>flyway-maven-plugin</artifactId>
                 <version>9.15.2</version>
             </plugin>
+            <!-- Ajout du pluggin JACOCO -->
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+            </plugin>
         </plugins>
     </build>
 </project>
