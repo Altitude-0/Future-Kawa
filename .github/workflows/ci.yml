@@ -41,6 +41,7 @@ jobs:
               -Dsonar.organization=altitude-0 \
               -Dsonar.host.url=https://sonarcloud.io \
               -Dsonar.token=${{ secrets.SONAR_TOKEN }}
+              -Dsonar.coverage.jacoco.xmlReportPaths=futurekawa-backend-core/target/site/jacoco/jacoco.xml
   deploy-maven:
     needs: build-and-test
     runs-on: ubuntu-latest
