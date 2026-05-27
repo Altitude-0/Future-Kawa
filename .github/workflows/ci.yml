@@ -29,19 +29,18 @@ jobs:
           distribution: temurin
           cache: maven
 
-      - name: Build and run tests with coverage
-        run: mvn clean verify
+      # - name: Build and run tests with coverage
+      #   run: mvn clean verify
 
-      - name: SonarCloud analysis
-        if: env.SONAR_TOKEN != ''
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: |
-          mvn sonar:sonar \
-            -Dsonar.projectKey=Altitude-0_Future-Kawa \
-            -Dsonar.organization=altitude-0 \
-            -Dsonar.host.url=https://sonarcloud.io \
-            -Dsonar.token=${{ secrets.SONAR_TOKEN }}
+      - name: Build, test and SonarCloud analysis
+          env:
+            SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          run: |
+            mvn clean verify sonar:sonar \
+              -Dsonar.projectKey=Altitude-0_Future-Kawa \
+              -Dsonar.organization=altitude-0 \
+              -Dsonar.host.url=https://sonarcloud.io \
+              -Dsonar.token=${{ secrets.SONAR_TOKEN }}
   deploy-maven:
     needs: build-and-test
     runs-on: ubuntu-latest
