@@ -9,7 +9,7 @@
   COPY futurekawa-backend-core/src ./futurekawa-backend-core/src
 
   # Builder le JAR
-  RUN mvn clean package -f futurekawa-backend-core/pom.xml -DskipTests
+  RUN mvn clean package -f futurekawa-backend-core/pom.xml -Dmaven.test.skip=true
 
   # Runtime image (sans alpine pour compatibilité Mac/ARM)                                                                 
   FROM eclipse-temurin:17-jre

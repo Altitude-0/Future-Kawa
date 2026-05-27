@@ -14,7 +14,5 @@ public class WarehouseDTO {
     private UUID id;
     private String name;
     private Float idealTemperature;
-    private Float idealHumidity;
     private Float toleranceTemperature;
-    private Float toleranceHumidity;
 }

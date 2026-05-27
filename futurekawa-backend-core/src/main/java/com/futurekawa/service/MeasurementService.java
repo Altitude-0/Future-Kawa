@@ -41,7 +41,6 @@ public class MeasurementService {
         Measurement measurement = measurementRepository.findById(id)
             .orElseThrow(() -> new IllegalArgumentException("Measurement not found: " + id));
         measurement.setTemperature(updatedMeasurement.getTemperature());
-        measurement.setHumidity(updatedMeasurement.getHumidity());
         measurement.setMeasuredAt(updatedMeasurement.getMeasuredAt());
         return measurementRepository.save(measurement);
     }
@@ -51,9 +50,6 @@ public class MeasurementService {
             .orElseThrow(() -> new IllegalArgumentException("Measurement not found: " + id));
         if (partialMeasurement.getTemperature() != null) {
             measurement.setTemperature(partialMeasurement.getTemperature());
-        }
-        if (partialMeasurement.getHumidity() != null) {
-            measurement.setHumidity(partialMeasurement.getHumidity());
         }
         if (partialMeasurement.getMeasuredAt() != null) {
             measurement.setMeasuredAt(partialMeasurement.getMeasuredAt());
