@@ -65,7 +65,7 @@ jobs:
   build-and-push:
     needs: build-and-test
     runs-on: ubuntu-latest
-    name: Build & Push Docker Image
+    name: Build & Push Docker Images
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -76,11 +76,23 @@ jobs:
       - name: Login to GHCR
         run: echo ${{ secrets.GITHUB_TOKEN }} | docker login ${{ env.REGISTRY }} -u ${{ github.actor }} --password-stdin
 
-      - name: Build Docker image
-        run: docker build -t ${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER_LOWER }}/${{ env.IMAGE_NAME }}:${{ github.sha }} -f futurekawa-backend-core/Dockerfile .
+      - name: Build and push Backend Core image
+        run: |
+          docker build \
+            -t ${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER_LOWER }}/${{ env.IMAGE_NAME }}:latest \
+            -t ${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER_LOWER }}/${{ env.IMAGE_NAME }}:${{ github.sha }} \
+            -f futurekawa-backend-core/Dockerfile .
+          docker push ${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER_LOWER }}/${{ env.IMAGE_NAME }}:latest
+          docker push ${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER_LOWER }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
 
-      - name: Push Docker image
-        run: docker push ${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER_LOWER }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+      - name: Build and push MQTT Service image
+        run: |
+          docker build \
+            -t ${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER_LOWER }}/futurekawa-mqtt-service:latest \
+            -t ${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER_LOWER }}/futurekawa-mqtt-service:${{ github.sha }} \
+            -f futurekawa-mqtt-service/Dockerfile .
+          docker push ${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER_LOWER }}/futurekawa-mqtt-service:latest
+          docker push ${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER_LOWER }}/futurekawa-mqtt-service:${{ github.sha }}
 
   notify-discord:
     needs: [build-and-test, deploy-maven, build-and-push]

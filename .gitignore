@@ -1,5 +1,6 @@
 # Maven
 target/
+**/target/
 pom.xml.tag
 pom.xml.releaseBackup
 pom.xml.versionsBackup
@@ -43,7 +44,7 @@ bin/
 dist/
 build/
 
-# Node (si frontend integré)
+# Node (si frontend intégré)
 node_modules/
 npm-debug.log
 yarn-error.log

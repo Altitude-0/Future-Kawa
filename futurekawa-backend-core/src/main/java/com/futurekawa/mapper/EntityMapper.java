@@ -15,9 +15,7 @@ public class EntityMapper {
             .id(warehouse.getId())
             .name(warehouse.getName())
             .idealTemperature(warehouse.getIdealTemperature())
-            .idealHumidity(warehouse.getIdealHumidity())
             .toleranceTemperature(warehouse.getToleranceTemperature())
-            .toleranceHumidity(warehouse.getToleranceHumidity())
             .build();
     }
 
@@ -46,9 +44,19 @@ public class EntityMapper {
             .stockId(measurement.getStock() != null ? measurement.getStock().getId() : null)
             .measuredAt(measurement.getMeasuredAt())
             .temperature(measurement.getTemperature())
-            .humidity(measurement.getHumidity())
-            .sensorId(measurement.getSensorId())
             .createdAt(measurement.getCreatedAt())
+            .build();
+    }
+
+    public Measurement toMeasurementEntity(MeasurementDTO dto, Stock stock) {
+        if (dto == null) {
+            return null;
+        }
+        return Measurement.builder()
+            .id(dto.getId())
+            .stock(stock)
+            .temperature(dto.getTemperature())
+            .measuredAt(dto.getMeasuredAt())
             .build();
     }
 
@@ -75,9 +83,7 @@ public class EntityMapper {
             .id(config.getId())
             .countryCode(config.getCountry() != null ? config.getCountry().getCode() : null)
             .temperatureIdeal(config.getTemperatureIdeal())
-            .humidityIdeal(config.getHumidityIdeal())
             .temperatureTolerance(config.getTemperatureTolerance())
-            .humidityTolerance(config.getHumidityTolerance())
             .temperatureUnit(config.getTemperatureUnit().toString())
             .alertOldLotDays(config.getAlertOldLotDays())
             .createdAt(config.getCreatedAt())
@@ -93,9 +99,7 @@ public class EntityMapper {
             .id(dto.getId())
             .country(country)
             .temperatureIdeal(dto.getTemperatureIdeal())
-            .humidityIdeal(dto.getHumidityIdeal())
             .temperatureTolerance(dto.getTemperatureTolerance())
-            .humidityTolerance(dto.getHumidityTolerance())
             .temperatureUnit(Configuration.TemperatureUnit.valueOf(dto.getTemperatureUnit()))
             .alertOldLotDays(dto.getAlertOldLotDays())
             .build();
