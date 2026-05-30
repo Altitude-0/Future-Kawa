@@ -7,8 +7,8 @@ import java.util.UUID;
 
 @Entity
 @Table(name = "measurements", indexes = {
-    @Index(name = "idx_stock_id", columnList = "stock_id"),
-    @Index(name = "idx_measured_at", columnList = "measured_at")
+    @Index(name = "idx_measurement_sensor", columnList = "fk_sensors"),
+    @Index(name = "idx_measured_at", columnList = "created_at")
 })
 @Data
 @NoArgsConstructor
@@ -21,17 +21,16 @@ public class Measurement {
     private UUID id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "stock_id", nullable = false)
-    private Stock stock;
+    @JoinColumn(name = "fk_sensors", nullable = false)
+    private Sensor sensor;
 
-    @Column(nullable = false)
+    @Column(name = "created_at", nullable = false)
     @Builder.Default
-    private LocalDateTime measuredAt = LocalDateTime.now();
+    private LocalDateTime createdAt = LocalDateTime.now();
 
     @Column(nullable = false)
     private Float temperature;
 
-    @Column(name = "created_at", nullable = false, updatable = false)
-    @Builder.Default
-    private LocalDateTime createdAt = LocalDateTime.now();
+    @Column(nullable = false)
+    private Float humidity;
 }

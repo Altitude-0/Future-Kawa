@@ -12,13 +12,13 @@ import java.util.UUID;
 @Repository
 public interface MeasurementRepository extends JpaRepository<Measurement, UUID> {
 
-    List<Measurement> findByStockIdOrderByMeasuredAtDesc(UUID stockId);
+    List<Measurement> findBySensorIdOrderByCreatedAtDesc(UUID sensorId);
 
     @Query("""
         SELECT m FROM Measurement m
-        WHERE m.stock.id = :stockId
-        ORDER BY m.measuredAt DESC
+        WHERE m.sensor.id = :sensorId
+        ORDER BY m.createdAt DESC
         LIMIT 1
     """)
-    Optional<Measurement> findLatestByStockId(UUID stockId);
+    Optional<Measurement> findLatestBySensorId(UUID sensorId);
 }

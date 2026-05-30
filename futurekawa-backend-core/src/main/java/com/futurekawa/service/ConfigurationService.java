@@ -28,22 +28,15 @@ public class ConfigurationService {
     private final CountryRepository countryRepository;
     private final FuturekawaProperties defaultProperties;
 
-    /**
-     * Get configuration for a country by country code with fallback to default properties.
-     * Result is cached for 5 minutes to avoid repeated DB queries.
-     */
     @Cacheable(value = "configurations", key = "#countryCode")
     public Configuration getConfiguration(String countryCode) {
-        Country country = countryRepository.findByCode(countryCode)
+        Country country = countryRepository.findByCodeIso(countryCode)
             .orElseThrow(() -> new IllegalArgumentException("Country not found: " + countryCode));
 
         return configRepository.findByCountryId(country.getId())
             .orElseGet(() -> buildDefaultConfiguration(country));
     }
 
-    /**
-     * Get configuration for a country by country ID with fallback to default properties.
-     */
     @Cacheable(value = "configurations", key = "#countryId")
     public Configuration getConfigurationByCountryId(UUID countryId) {
         Country country = countryRepository.findById(countryId)
@@ -53,76 +46,36 @@ public class ConfigurationService {
             .orElseGet(() -> buildDefaultConfiguration(country));
     }
 
-    /**
-     * Update configuration and record audit entries for each changed field.
-     * @CacheEvict invalidates cache for this country code after update.
-     */
     @CacheEvict(value = "configurations", key = "#countryCode")
     public Configuration updateConfiguration(String countryCode, Configuration newConfig, User updatingUser) {
-        Country country = countryRepository.findByCode(countryCode)
+        Country country = countryRepository.findByCodeIso(countryCode)
             .orElseThrow(() -> new IllegalArgumentException("Country not found: " + countryCode));
 
         Configuration current = configRepository.findByCountryId(country.getId())
             .orElseGet(() -> buildDefaultConfiguration(country));
 
-        // Compare each field and create audit entry if changed
-        auditIfChanged(current, newConfig, updatingUser, "temperatureIdeal",
-            String.valueOf(current.getTemperatureIdeal()),
-            String.valueOf(newConfig.getTemperatureIdeal()));
+        // Audit changed fields
+        auditIfChanged(current, updatingUser, "temperatureIdeal",
+            String.valueOf(current.getTemperatureIdeal()), String.valueOf(newConfig.getTemperatureIdeal()));
+        auditIfChanged(current, updatingUser, "humidityIdeal",
+            String.valueOf(current.getHumidityIdeal()), String.valueOf(newConfig.getHumidityIdeal()));
+        auditIfChanged(current, updatingUser, "temperatureTolerance",
+            String.valueOf(current.getTemperatureTolerance()), String.valueOf(newConfig.getTemperatureTolerance()));
+        auditIfChanged(current, updatingUser, "humidityTolerance",
+            String.valueOf(current.getHumidityTolerance()), String.valueOf(newConfig.getHumidityTolerance()));
 
-        auditIfChanged(current, newConfig, updatingUser, "temperatureTolerance",
-            String.valueOf(current.getTemperatureTolerance()),
-            String.valueOf(newConfig.getTemperatureTolerance()));
-
-        auditIfChanged(current, newConfig, updatingUser, "temperatureUnit",
-            current.getTemperatureUnit().toString(),
-            newConfig.getTemperatureUnit().toString());
-
-        auditIfChanged(current, newConfig, updatingUser, "alertOldLotDays",
-            String.valueOf(current.getAlertOldLotDays()),
-            String.valueOf(newConfig.getAlertOldLotDays()));
-
-        // Update current with new values
+        // Update current
         current.setTemperatureIdeal(newConfig.getTemperatureIdeal());
+        current.setHumidityIdeal(newConfig.getHumidityIdeal());
         current.setTemperatureTolerance(newConfig.getTemperatureTolerance());
+        current.setHumidityTolerance(newConfig.getHumidityTolerance());
         current.setTemperatureUnit(newConfig.getTemperatureUnit());
-        current.setAlertOldLotDays(newConfig.getAlertOldLotDays());
-        current.setUpdatedAt(LocalDateTime.now());
 
         return configRepository.save(current);
     }
 
-    /**
-     * Convert temperature between Celsius and Fahrenheit.
-     * @param value The temperature value to convert
-     * @param from Source unit (CELSIUS or FAHRENHEIT)
-     * @param to Target unit (CELSIUS or FAHRENHEIT)
-     * @return Converted temperature value
-     */
-    public Float convertTemperature(Float value, Configuration.TemperatureUnit from, Configuration.TemperatureUnit to) {
-        if (from == to) {
-            return value;
-        }
-
-        if (from == Configuration.TemperatureUnit.CELSIUS && to == Configuration.TemperatureUnit.FAHRENHEIT) {
-            return (value * 9.0f / 5.0f) + 32.0f;
-        }
-
-        if (from == Configuration.TemperatureUnit.FAHRENHEIT && to == Configuration.TemperatureUnit.CELSIUS) {
-            return (value - 32.0f) * 5.0f / 9.0f;
-        }
-
-        return value;
-    }
-
-    // Helper methods
-
-    /**
-     * Create audit entry if field value changed.
-     */
-    private void auditIfChanged(Configuration current, Configuration newConfig, User user,
-                                String fieldName, String oldValue, String newValue) {
-        if (!oldValue.equals(newValue)) {
+    private void auditIfChanged(Configuration current, User user, String fieldName, String oldValue, String newValue) {
+        if (oldValue != null && !oldValue.equals(newValue)) {
             ConfigurationAudit audit = ConfigurationAudit.builder()
                 .configuration(current)
                 .user(user)
@@ -135,18 +88,10 @@ public class ConfigurationService {
         }
     }
 
-    /**
-     * Create a new configuration for a country.
-     * Invalidates cache for this country after creation.
-     */
-    @CacheEvict(value = "configurations", key = "#config.country.code")
     public Configuration createConfiguration(Configuration config) {
         return configRepository.save(config);
     }
 
-    /**
-     * Retrieve audit history for a configuration, ordered by most recent first.
-     */
     @Transactional(readOnly = true)
     public List<ConfigurationAudit> getAuditHistory(UUID configurationId) {
         return auditRepository.findByConfigurationIdOrderByChangedAtDesc(configurationId);
@@ -156,9 +101,11 @@ public class ConfigurationService {
         return Configuration.builder()
             .country(country)
             .temperatureIdeal(defaultProperties.getTemperatureIdeal())
+            .humidityIdeal(defaultProperties.getHumidityIdeal())
             .temperatureTolerance(defaultProperties.getTemperatureTolerance())
-            .temperatureUnit(Configuration.TemperatureUnit.CELSIUS)
-            .alertOldLotDays(defaultProperties.getAlertOldLotDays().intValue())
+            .humidityTolerance(defaultProperties.getHumidityTolerance())
+            .temperatureUnit("CELSIUS")
+            .createdAt(LocalDateTime.now())
             .build();
     }
 }

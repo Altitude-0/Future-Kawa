@@ -10,7 +10,7 @@ import java.util.UUID;
 @Repository
 public interface AlertRepository extends JpaRepository<Alert, UUID> {
 
-    List<Alert> findByStockIdOrderByAlertedAtDesc(UUID stockId);
+    List<Alert> findByContainerIdOrderByAlertedAtDesc(UUID containerId);
 
     List<Alert> findByEmailSentFalse();
 }

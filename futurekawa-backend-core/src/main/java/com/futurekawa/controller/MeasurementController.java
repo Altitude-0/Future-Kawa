@@ -26,7 +26,7 @@ public class MeasurementController {
     private final EntityMapper mapper;
 
     @PostMapping
-    @Operation(summary = "Record a new temperature/humidity measurement")
+    @Operation(summary = "Record a new measurement")
     public ResponseEntity<MeasurementDTO> createMeasurement(@Valid @RequestBody Measurement measurement) {
         Measurement created = measurementService.createMeasurement(measurement);
         return ResponseEntity.status(HttpStatus.CREATED).body(mapper.toMeasurementDTO(created));
@@ -47,37 +47,11 @@ public class MeasurementController {
             .orElse(ResponseEntity.notFound().build());
     }
 
-    @GetMapping("/stock/{stockId}")
-    @Operation(summary = "Get all measurements for a specific stock")
-    public ResponseEntity<List<MeasurementDTO>> getMeasurementsByStock(@PathVariable UUID stockId) {
-        List<Measurement> measurements = measurementService.getMeasurementsByStockId(stockId);
+    @GetMapping("/sensor/{sensorId}")
+    @Operation(summary = "Get all measurements for a specific sensor")
+    public ResponseEntity<List<MeasurementDTO>> getMeasurementsBySensor(@PathVariable UUID sensorId) {
+        List<Measurement> measurements = measurementService.getMeasurementsBySensorId(sensorId);
         return ResponseEntity.ok(measurements.stream().map(mapper::toMeasurementDTO).collect(Collectors.toList()));
-    }
-
-    @PutMapping("/{id}")
-    @Operation(summary = "Replace entire measurement (PUT - full replacement)")
-    public ResponseEntity<MeasurementDTO> updateMeasurementFull(
-            @PathVariable UUID id,
-            @Valid @RequestBody Measurement updatedMeasurement) {
-        try {
-            Measurement measurement = measurementService.updateMeasurement(id, updatedMeasurement);
-            return ResponseEntity.ok(mapper.toMeasurementDTO(measurement));
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.notFound().build();
-        }
-    }
-
-    @PatchMapping("/{id}")
-    @Operation(summary = "Partially update measurement (PATCH - partial update)")
-    public ResponseEntity<MeasurementDTO> updateMeasurementPartial(
-            @PathVariable UUID id,
-            @RequestBody Measurement partialMeasurement) {
-        try {
-            Measurement measurement = measurementService.partialUpdateMeasurement(id, partialMeasurement);
-            return ResponseEntity.ok(mapper.toMeasurementDTO(measurement));
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.notFound().build();
-        }
     }
 
     @DeleteMapping("/{id}")

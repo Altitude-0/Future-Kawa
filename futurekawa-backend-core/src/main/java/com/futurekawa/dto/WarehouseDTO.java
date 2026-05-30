@@ -13,6 +13,5 @@ import java.util.UUID;
 public class WarehouseDTO {
     private UUID id;
     private String name;
-    private Float idealTemperature;
-    private Float toleranceTemperature;
+    private UUID countryId;
 }

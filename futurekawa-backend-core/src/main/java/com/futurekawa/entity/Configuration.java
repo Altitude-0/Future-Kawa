@@ -5,7 +5,6 @@ import lombok.*;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-// Configuration entity representing country-specific temperature settings and alerting
 @Entity
 @Table(name = "configurations")
 @Data
@@ -19,38 +18,25 @@ public class Configuration {
     private UUID id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "country_id", nullable = false, unique = true)
+    @JoinColumn(name = "fk_country", nullable = false, unique = true)
     private Country country;
 
-    @Column(name = "temperature_ideal", nullable = false)
+    @Column(name = "temperature_ideal")
     private Float temperatureIdeal;
 
-    @Column(name = "temperature_tolerance", nullable = false)
+    @Column(name = "humidity_ideal")
+    private Float humidityIdeal;
+
+    @Column(name = "temperature_tolerance")
     private Float temperatureTolerance;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "temperature_unit", nullable = false)
-    @Builder.Default
-    private TemperatureUnit temperatureUnit = TemperatureUnit.CELSIUS;
+    @Column(name = "humidity_tolerance")
+    private Float humidityTolerance;
 
-    @Column(name = "alert_old_lot_days", nullable = false)
-    @Builder.Default
-    private Integer alertOldLotDays = 365;
+    @Column(name = "temperature_unit")
+    private String temperatureUnit;
 
     @Column(name = "created_at", nullable = false, updatable = false)
     @Builder.Default
     private LocalDateTime createdAt = LocalDateTime.now();
-
-    @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
-
-    @PreUpdate
-    protected void onUpdate() {
-        updatedAt = LocalDateTime.now();
-    }
-
-    public enum TemperatureUnit {
-        CELSIUS,
-        FAHRENHEIT
-    }
 }

@@ -38,10 +38,10 @@ public class AlertController {
             .orElse(ResponseEntity.notFound().build());
     }
 
-    @GetMapping("/stock/{stockId}")
-    @Operation(summary = "Get all alerts for a specific stock")
-    public ResponseEntity<List<AlertDTO>> getAlertsByStock(@PathVariable UUID stockId) {
-        List<Alert> alerts = alertService.getAlertsByStock(stockId);
+    @GetMapping("/container/{containerId}")
+    @Operation(summary = "Get all alerts for a specific container")
+    public ResponseEntity<List<AlertDTO>> getAlertsByContainer(@PathVariable UUID containerId) {
+        List<Alert> alerts = alertService.getAlertsByContainer(containerId);
         return ResponseEntity.ok(alerts.stream().map(mapper::toAlertDTO).collect(Collectors.toList()));
     }
 
