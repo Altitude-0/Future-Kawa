@@ -11,12 +11,10 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class AlertDTO {
+public class SensorDTO {
     private UUID id;
-    private UUID containerId;
-    private ContainerDTO container;
-    private LocalDateTime alertedAt;
-    private LocalDateTime createdAt;
-    private Boolean emailSent;
-    private String type;
+    private UUID sensorTypeId;
+    private SensorTypeDTO sensorType;
+    private LocalDateTime entryDate;
+    private String reference;
 }

@@ -1,7 +1,6 @@
 package com.futurekawa.dto;
 
 import lombok.*;
-
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -10,16 +9,11 @@ import java.util.UUID;
 @AllArgsConstructor
 @Builder
 public class ConfigurationAuditDTO {
-
     private UUID id;
-
-    private String fieldName;
-
-    private String oldValue;
-
-    private String newValue;
-
-    private String changedBy;
-
     private LocalDateTime changedAt;
+    private UUID configurationId;
+    private String fieldName;
+    private String newValue;
+    private String oldValue;
+    private UUID userId;
 }

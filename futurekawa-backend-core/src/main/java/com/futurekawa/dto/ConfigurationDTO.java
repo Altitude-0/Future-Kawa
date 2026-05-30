@@ -1,8 +1,6 @@
 package com.futurekawa.dto;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
-
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -11,21 +9,12 @@ import java.util.UUID;
 @AllArgsConstructor
 @Builder
 public class ConfigurationDTO {
-
     private UUID id;
-
-    private String countryCode;
-
+    private UUID countryId;
     private Float temperatureIdeal;
-
+    private Float humidityIdeal;
     private Float temperatureTolerance;
-
-    @JsonProperty("temperatureUnit")
+    private Float humidityTolerance;
     private String temperatureUnit;
-
-    private Integer alertOldLotDays;
-
     private LocalDateTime createdAt;
-
-    private LocalDateTime updatedAt;
 }

@@ -1,7 +1,7 @@
 package com.futurekawa.service;
 
 import com.futurekawa.entity.Alert;
-import com.futurekawa.entity.Stock;
+import com.futurekawa.entity.Container;
 import com.futurekawa.repository.AlertRepository;
 import com.futurekawa.strategy.AlertingStrategy;
 import lombok.RequiredArgsConstructor;
@@ -19,40 +19,40 @@ public class AlertService {
 
     private final AlertRepository alertRepository;
     private final AlertingStrategy alertingStrategy;
-    private final StockService stockService;
+    private final ContainerService containerService;
 
-    public void evaluateStockAlerts(Stock stock) {
-        List<Alert> newAlerts = alertingStrategy.evaluateAlerts(stock);
+    public void evaluateContainerAlerts(Container container) {
+        List<Alert> newAlerts = alertingStrategy.evaluateAlerts(container);
 
         for (Alert newAlert : newAlerts) {
             // Check if alert already exists
-            boolean exists = stock.getAlerts().stream()
+            boolean exists = container.getAlerts().stream()
                 .anyMatch(a -> a.getType() == newAlert.getType());
 
             if (!exists) {
                 alertRepository.save(newAlert);
-                stock.getAlerts().add(newAlert);
+                container.getAlerts().add(newAlert);
             }
         }
 
-        // Update stock status based on alerts
+        // Update container status based on alerts
         if (!newAlerts.isEmpty()) {
-            stockService.updateStockStatus(stock.getId(), Stock.Status.ALERT);
+            containerService.updateContainerStatus(container.getId(), Container.Status.warning);
         }
     }
 
-    public List<Alert> getAlertsByStock(UUID stockId) {
-        return alertRepository.findByStockIdOrderByAlertedAtDesc(stockId);
+    public List<Alert> getAlertsByContainer(UUID containerId) {
+        return alertRepository.findByContainerIdOrderByAlertedAtDesc(containerId);
     }
 
     public List<Alert> getUnsentAlerts() {
         return alertRepository.findByEmailSentFalse();
     }
 
-    public void evaluateAllStocks() {
-        List<Stock> allStocks = stockService.getAllStocks();
-        for (Stock stock : allStocks) {
-            evaluateStockAlerts(stock);
+    public void evaluateAllContainers() {
+        List<Container> allContainers = containerService.getAllContainers();
+        for (Container container : allContainers) {
+            evaluateContainerAlerts(container);
         }
     }
 
