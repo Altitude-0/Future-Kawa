@@ -3,65 +3,86 @@ package com.futurekawa.config;
 import com.futurekawa.entity.User;
 import com.futurekawa.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.jdbc.datasource.init.ResourceDatabasePopulator;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
+import javax.sql.DataSource;
+import java.time.LocalDateTime;
+import java.util.UUID;
+
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class DataInitializer implements CommandLineRunner {
 
     private final UserRepository userRepository;
+    private final DataSource dataSource;
     private final PasswordEncoder passwordEncoder;
+    private final FuturekawaProperties properties;
 
     @Override
     public void run(String... args) throws Exception {
-        // Créer un utilisateur admin par défaut si n'existe pas
-        if (!userRepository.existsByUsername("admin")) {
-            User admin = User.builder()
-                .username("admin")
-                .email("admin@futurekawa.com")
-                .password(passwordEncoder.encode("admin123"))
-                .firstName("Admin")
-                .lastName("FutureKawa")
-                .role(User.UserRole.ADMIN)
-                .enabled(true)
-                .build();
+        // 1. Check if the database is empty by counting the number of users
+        if (userRepository.count() == 0) {
+            log.info("🗄️ Database is empty, initializing seed data...");
+            
+            // 2. Create default users programmatically (Safe from Sonar S8215)
+            createDefaultUsers();
 
-            userRepository.save(admin);
-            System.out.println("✅ Admin user created: admin / admin123");
+            // 3. Execute the rest of the seed data from SQL
+            try {
+                ResourceDatabasePopulator populator = new ResourceDatabasePopulator();
+                populator.addScript(new ClassPathResource("db/scripts/seed_data.sql"));
+                populator.execute(dataSource);
+                log.info("✅ Seed data SQL executed successfully!");
+            } catch (Exception e) {
+                log.error("❌ Error while executing seed_data.sql: {}", e.getMessage(), e);
+            }
+        } else {
+            log.info("ℹ️ Database already contains data, skipping initialization.");
         }
+    }
 
-        // Créer un utilisateur opérateur par défaut si n'existe pas
-        if (!userRepository.existsByUsername("operator")) {
-            User operator = User.builder()
-                .username("operator")
-                .email("operator@futurekawa.com")
-                .password(passwordEncoder.encode("operator123"))
-                .firstName("Operator")
-                .lastName("FutureKawa")
-                .role(User.UserRole.OPERATOR)
-                .enabled(true)
-                .build();
+    private void createDefaultUsers() {
+        String encodedPassword = passwordEncoder.encode(properties.getSeedData().getUserPassword());
 
-            userRepository.save(operator);
-            System.out.println("✅ Operator user created: operator / operator123");
-        }
+        User admin = User.builder()
+            .id(UUID.fromString("a1234567-89ab-cdef-0123-456789abcdef"))
+            .username("admin_user")
+            .email("admin@futurekawa.local")
+            .password(encodedPassword)
+            .role(User.UserRole.ADMIN)
+            .enabled(true)
+            .createdAt(LocalDateTime.now())
+            .build();
 
-        // Créer un utilisateur viewer par défaut si n'existe pas
-        if (!userRepository.existsByUsername("viewer")) {
-            User viewer = User.builder()
-                .username("viewer")
-                .email("viewer@futurekawa.com")
-                .password(passwordEncoder.encode("viewer123"))
-                .firstName("Viewer")
-                .lastName("FutureKawa")
-                .role(User.UserRole.VIEWER)
-                .enabled(true)
-                .build();
+        User manager = User.builder()
+            .id(UUID.fromString("b1234567-89ab-cdef-0123-456789abcdef"))
+            .username("manager_user")
+            .email("manager@futurekawa.local")
+            .password(encodedPassword)
+            .role(User.UserRole.OPERATOR) // Updated to OPERATOR to match UserRole enum
+            .enabled(true)
+            .createdAt(LocalDateTime.now())
+            .build();
 
-            userRepository.save(viewer);
-            System.out.println("✅ Viewer user created: viewer / viewer123");
-        }
+        User viewer = User.builder()
+            .id(UUID.fromString("c1234567-89ab-cdef-0123-456789abcdef"))
+            .username("viewer_user")
+            .email("viewer@futurekawa.local")
+            .password(encodedPassword)
+            .role(User.UserRole.VIEWER)
+            .enabled(true)
+            .createdAt(LocalDateTime.now())
+            .build();
+
+        userRepository.save(admin);
+        userRepository.save(manager);
+        userRepository.save(viewer);
+        log.info("👤 Default users created successfully.");
     }
 }

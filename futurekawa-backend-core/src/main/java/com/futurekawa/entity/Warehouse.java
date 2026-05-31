@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.UUID;
 
 @Entity
-@Table(name = "warehouses")
+@Table(name = "warehouse")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -17,19 +17,13 @@ public class Warehouse {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @Column(nullable = false, length = 100)
+    @Column(nullable = false)
     private String name;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "country_id", nullable = false)
+    @JoinColumn(name = "fk_country", nullable = false)
     private Country country;
 
-    @Column(nullable = false)
-    private Float idealTemperature;
-
-    @Column(nullable = false)
-    private Float toleranceTemperature;
-
     @OneToMany(mappedBy = "warehouse", cascade = CascadeType.ALL)
-    private List<Stock> stocks;
+    private List<Container> containers;
 }

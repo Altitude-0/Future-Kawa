@@ -4,19 +4,13 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class AlertDTO {
+public class SensorTypeDTO {
     private UUID id;
-    private UUID containerId;
-    private ContainerDTO container;
-    private LocalDateTime alertedAt;
-    private LocalDateTime createdAt;
-    private Boolean emailSent;
     private String type;
 }

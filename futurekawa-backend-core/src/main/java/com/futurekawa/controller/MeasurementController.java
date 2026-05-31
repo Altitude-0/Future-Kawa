@@ -2,7 +2,9 @@ package com.futurekawa.controller;
 
 import com.futurekawa.dto.MeasurementDTO;
 import com.futurekawa.entity.Measurement;
+import com.futurekawa.entity.Sensor;
 import com.futurekawa.mapper.EntityMapper;
+import com.futurekawa.repository.SensorRepository;
 import com.futurekawa.service.MeasurementService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -14,7 +16,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/v1/measurements")
@@ -23,12 +24,19 @@ import java.util.stream.Collectors;
 public class MeasurementController {
 
     private final MeasurementService measurementService;
+    private final SensorRepository sensorRepository;
     private final EntityMapper mapper;
 
     @PostMapping
-    @Operation(summary = "Record a new temperature/humidity measurement")
-    public ResponseEntity<MeasurementDTO> createMeasurement(@Valid @RequestBody Measurement measurement) {
-        Measurement created = measurementService.createMeasurement(measurement);
+    @Operation(summary = "Record a new measurement")
+    public ResponseEntity<MeasurementDTO> createMeasurement(@Valid @RequestBody MeasurementDTO measurementDto) {
+        Sensor sensorRef = null;
+        if (measurementDto.getSensorReference() != null) {
+            sensorRef = sensorRepository.findByReference(measurementDto.getSensorReference())
+                .orElseThrow(() -> new IllegalArgumentException("Sensor not found with reference: " + measurementDto.getSensorReference()));
+        }
+        Measurement measurementToCreate = mapper.toMeasurementEntity(measurementDto, sensorRef);
+        Measurement created = measurementService.createMeasurement(measurementToCreate);
         return ResponseEntity.status(HttpStatus.CREATED).body(mapper.toMeasurementDTO(created));
     }
 
@@ -36,7 +44,7 @@ public class MeasurementController {
     @Operation(summary = "List all measurements")
     public ResponseEntity<List<MeasurementDTO>> getAllMeasurements() {
         List<Measurement> measurements = measurementService.getAllMeasurements();
-        return ResponseEntity.ok(measurements.stream().map(mapper::toMeasurementDTO).collect(Collectors.toList()));
+        return ResponseEntity.ok(measurements.stream().map(mapper::toMeasurementDTO).toList());
     }
 
     @GetMapping("/{id}")
@@ -47,37 +55,11 @@ public class MeasurementController {
             .orElse(ResponseEntity.notFound().build());
     }
 
-    @GetMapping("/stock/{stockId}")
-    @Operation(summary = "Get all measurements for a specific stock")
-    public ResponseEntity<List<MeasurementDTO>> getMeasurementsByStock(@PathVariable UUID stockId) {
-        List<Measurement> measurements = measurementService.getMeasurementsByStockId(stockId);
-        return ResponseEntity.ok(measurements.stream().map(mapper::toMeasurementDTO).collect(Collectors.toList()));
-    }
-
-    @PutMapping("/{id}")
-    @Operation(summary = "Replace entire measurement (PUT - full replacement)")
-    public ResponseEntity<MeasurementDTO> updateMeasurementFull(
-            @PathVariable UUID id,
-            @Valid @RequestBody Measurement updatedMeasurement) {
-        try {
-            Measurement measurement = measurementService.updateMeasurement(id, updatedMeasurement);
-            return ResponseEntity.ok(mapper.toMeasurementDTO(measurement));
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.notFound().build();
-        }
-    }
-
-    @PatchMapping("/{id}")
-    @Operation(summary = "Partially update measurement (PATCH - partial update)")
-    public ResponseEntity<MeasurementDTO> updateMeasurementPartial(
-            @PathVariable UUID id,
-            @RequestBody Measurement partialMeasurement) {
-        try {
-            Measurement measurement = measurementService.partialUpdateMeasurement(id, partialMeasurement);
-            return ResponseEntity.ok(mapper.toMeasurementDTO(measurement));
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.notFound().build();
-        }
+    @GetMapping("/sensor/{sensorId}")
+    @Operation(summary = "Get all measurements for a specific sensor")
+    public ResponseEntity<List<MeasurementDTO>> getMeasurementsBySensor(@PathVariable UUID sensorId) {
+        List<Measurement> measurements = measurementService.getMeasurementsBySensorId(sensorId);
+        return ResponseEntity.ok(measurements.stream().map(mapper::toMeasurementDTO).toList());
     }
 
     @DeleteMapping("/{id}")

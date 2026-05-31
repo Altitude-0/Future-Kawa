@@ -19,7 +19,9 @@ public class MeasurementService {
     private final MeasurementRepository measurementRepository;
 
     public Measurement createMeasurement(Measurement measurement) {
-        measurement.setCreatedAt(LocalDateTime.now());
+        if (measurement.getCreatedAt() == null) {
+            measurement.setCreatedAt(LocalDateTime.now());
+        }
         return measurementRepository.save(measurement);
     }
 
@@ -33,28 +35,8 @@ public class MeasurementService {
     }
 
     @Transactional(readOnly = true)
-    public List<Measurement> getMeasurementsByStockId(UUID stockId) {
-        return measurementRepository.findByStockIdOrderByMeasuredAtDesc(stockId);
-    }
-
-    public Measurement updateMeasurement(UUID id, Measurement updatedMeasurement) {
-        Measurement measurement = measurementRepository.findById(id)
-            .orElseThrow(() -> new IllegalArgumentException("Measurement not found: " + id));
-        measurement.setTemperature(updatedMeasurement.getTemperature());
-        measurement.setMeasuredAt(updatedMeasurement.getMeasuredAt());
-        return measurementRepository.save(measurement);
-    }
-
-    public Measurement partialUpdateMeasurement(UUID id, Measurement partialMeasurement) {
-        Measurement measurement = measurementRepository.findById(id)
-            .orElseThrow(() -> new IllegalArgumentException("Measurement not found: " + id));
-        if (partialMeasurement.getTemperature() != null) {
-            measurement.setTemperature(partialMeasurement.getTemperature());
-        }
-        if (partialMeasurement.getMeasuredAt() != null) {
-            measurement.setMeasuredAt(partialMeasurement.getMeasuredAt());
-        }
-        return measurementRepository.save(measurement);
+    public List<Measurement> getMeasurementsBySensorId(UUID sensorId) {
+        return measurementRepository.findBySensorIdOrderByCreatedAtDesc(sensorId);
     }
 
     public void deleteMeasurement(UUID id) {

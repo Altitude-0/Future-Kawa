@@ -1,10 +1,7 @@
 package com.futurekawa.strategy;
 
 import com.futurekawa.config.FuturekawaProperties;
-import com.futurekawa.entity.Alert;
-import com.futurekawa.entity.Configuration;
-import com.futurekawa.entity.Measurement;
-import com.futurekawa.entity.Stock;
+import com.futurekawa.entity.*;
 import com.futurekawa.repository.MeasurementRepository;
 import com.futurekawa.service.ConfigurationService;
 import lombok.RequiredArgsConstructor;
@@ -16,12 +13,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-/**
- * Default alerting strategy implementation.
- * Uses ConfigurationService for dynamic country-specific thresholds.
- * Falls back to FuturekawaProperties if configuration not found.
- * Can be overridden by country/region-specific implementations.
- */
 @Component
 @RequiredArgsConstructor
 public class DefaultAlertingStrategy implements AlertingStrategy {
@@ -31,57 +22,63 @@ public class DefaultAlertingStrategy implements AlertingStrategy {
     private final FuturekawaProperties properties;
 
     @Override
-    public List<Alert> evaluateAlerts(Stock stock) {
+    public List<Alert> evaluateAlerts(Container container) {
         List<Alert> alerts = new ArrayList<>();
 
-        // Retrieve dynamic configuration for the stock's country
-        String countryCode = stock.getWarehouse().getCountry().getCode();
+        // Retrieve dynamic configuration for the container's country
+        String countryCode = container.getWarehouse().getCountry().getCodeIso();
         Configuration config = configurationService.getConfiguration(countryCode);
 
-        // Check 1: Stock expiry
-        long daysInStorage = ChronoUnit.DAYS.between(stock.getCreatedAt(), LocalDateTime.now());
-        if (daysInStorage > config.getAlertOldLotDays()) {
-            Alert expiryAlert = Alert.builder()
-                .stock(stock)
-                .alertedAt(LocalDateTime.now())
-                .type(Alert.AlertType.EXPIRED_STOCK)
-                .description(String.format("Stock stored for %d days (expiry: %d days)", daysInStorage, config.getAlertOldLotDays()))
-                .emailSent(false)
-                .build();
-            alerts.add(expiryAlert);
-        }
-
-        // Check 2: Conditions out of range
-        Optional<Measurement> latestMeasurement = measurementRepository.findLatestByStockId(stock.getId());
-        if (latestMeasurement.isPresent()) {
-            Measurement measurement = latestMeasurement.get();
-            Float tempIdeal = config.getTemperatureIdeal();
-            Float tempTolerance = config.getTemperatureTolerance();
-
-            boolean tempOutOfRange = Math.abs(measurement.getTemperature() - tempIdeal) > tempTolerance;
-
-            if (tempOutOfRange) {
-                Alert conditionAlert = Alert.builder()
-                    .stock(stock)
-                    .alertedAt(LocalDateTime.now())
-                    .type(Alert.AlertType.CONDITION_OUT_OF_RANGE)
-                    .description(String.format(
-                        "Temperature out of range: %.1f°C (ideal %.1f±%.1f)",
-                        measurement.getTemperature(), tempIdeal, tempTolerance
-                    ))
-                    .emailSent(false)
-                    .build();
-                alerts.add(conditionAlert);
-            }
-        }
+        evaluateExpiry(container, alerts);
+        evaluateConditions(container, config, alerts);
 
         return alerts;
     }
 
-    /**
-     * Fallback methods returning default properties values.
-     * These are only used if evaluateAlerts cannot retrieve configuration.
-     */
+    private void evaluateExpiry(Container container, List<Alert> alerts) {
+        long daysInStorage = ChronoUnit.DAYS.between(container.getEntryDate(), LocalDateTime.now());
+        if (daysInStorage > 365) {
+            alerts.add(createAlert(container, Alert.AlertType.OUTDATED_CONTAINER));
+        }
+    }
+
+    private void evaluateConditions(Container container, Configuration config, List<Alert> alerts) {
+        if (container.getSensor() == null) {
+            return;
+        }
+
+        measurementRepository.findLatestBySensorId(container.getSensor().getId())
+            .ifPresent(measurement -> {
+                evaluateTemperature(container, measurement, config, alerts);
+                evaluateHumidity(container, measurement, config, alerts);
+            });
+    }
+
+    private void evaluateTemperature(Container container, Measurement measurement, Configuration config, List<Alert> alerts) {
+        Float tempIdeal = config.getTemperatureIdeal();
+        Float tempTolerance = config.getTemperatureTolerance();
+        if (tempIdeal != null && tempTolerance != null && Math.abs(measurement.getTemperature() - tempIdeal) > tempTolerance) {
+            alerts.add(createAlert(container, Alert.AlertType.TEMPERATURE_OUT_OF_RANGE));
+        }
+    }
+
+    private void evaluateHumidity(Container container, Measurement measurement, Configuration config, List<Alert> alerts) {
+        Float humIdeal = config.getHumidityIdeal();
+        Float humTolerance = config.getHumidityTolerance();
+        if (humIdeal != null && humTolerance != null && Math.abs(measurement.getHumidity() - humIdeal) > humTolerance) {
+            alerts.add(createAlert(container, Alert.AlertType.HUMIDITY_OUT_OF_RANGE));
+        }
+    }
+
+    private Alert createAlert(Container container, Alert.AlertType type) {
+        return Alert.builder()
+            .container(container)
+            .alertedAt(LocalDateTime.now())
+            .type(type)
+            .emailSent(false)
+            .build();
+    }
+
     @Override
     public Float getIdealTemperature() {
         return properties.getTemperatureIdeal();
@@ -93,7 +90,7 @@ public class DefaultAlertingStrategy implements AlertingStrategy {
     }
 
     @Override
-    public Float getTemperanceTolerance() {
+    public Float getTemperatureTolerance() {
         return properties.getTemperatureTolerance();
     }
 

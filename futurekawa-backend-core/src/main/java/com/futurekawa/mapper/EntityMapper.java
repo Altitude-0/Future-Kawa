@@ -7,115 +7,143 @@ import org.springframework.stereotype.Component;
 @Component
 public class EntityMapper {
 
-    public WarehouseDTO toWarehouseDTO(Warehouse warehouse) {
-        if (warehouse == null) {
-            return null;
-        }
-        return WarehouseDTO.builder()
-            .id(warehouse.getId())
-            .name(warehouse.getName())
-            .idealTemperature(warehouse.getIdealTemperature())
-            .toleranceTemperature(warehouse.getToleranceTemperature())
+    public CountryDTO toCountryDTO(Country country) {
+        if (country == null) return null;
+        return CountryDTO.builder()
+            .id(country.getId())
+            .codeIso(country.getCodeIso())
             .build();
     }
 
-    public StockDTO toStockDTO(Stock stock) {
-        if (stock == null) {
-            return null;
-        }
-        return StockDTO.builder()
-            .id(stock.getId())
-            .warehouseId(stock.getWarehouse() != null ? stock.getWarehouse().getId() : null)
-            .warehouse(toWarehouseDTO(stock.getWarehouse()))
-            .reference(stock.getReference())
-            .status(stock.getStatus().toString())
-            .qualityScore(stock.getQualityScore())
-            .createdAt(stock.getCreatedAt())
-            .updatedAt(stock.getUpdatedAt())
+    public WarehouseDTO toWarehouseDTO(Warehouse warehouse) {
+        if (warehouse == null) return null;
+        return WarehouseDTO.builder()
+            .id(warehouse.getId())
+            .name(warehouse.getName())
+            .countryId(warehouse.getCountry() != null ? warehouse.getCountry().getId() : null)
+            .build();
+    }
+
+    public SensorTypeDTO toSensorTypeDTO(SensorType type) {
+        if (type == null) return null;
+        return SensorTypeDTO.builder()
+            .id(type.getId())
+            .type(type.getType())
+            .build();
+    }
+
+    public SensorDTO toSensorDTO(Sensor sensor) {
+        if (sensor == null) return null;
+        return SensorDTO.builder()
+            .id(sensor.getId())
+            .sensorTypeId(sensor.getSensorType() != null ? sensor.getSensorType().getId() : null)
+            .sensorType(toSensorTypeDTO(sensor.getSensorType()))
+            .entryDate(sensor.getEntryDate())
+            .reference(sensor.getReference())
+            .build();
+    }
+
+    public ContainerDTO toContainerDTO(Container container) {
+        if (container == null) return null;
+        return ContainerDTO.builder()
+            .id(container.getId())
+            .reference(container.getReference())
+            .warehouseId(container.getWarehouse() != null ? container.getWarehouse().getId() : null)
+            .warehouse(toWarehouseDTO(container.getWarehouse()))
+            .idSensor(container.getSensor() != null ? container.getSensor().getId() : null)
+            .sensor(toSensorDTO(container.getSensor()))
+            .status(container.getStatus() != null ? container.getStatus().toString() : null)
+            .entryDate(container.getEntryDate())
+            .exitDate(container.getExitDate())
             .build();
     }
 
     public MeasurementDTO toMeasurementDTO(Measurement measurement) {
-        if (measurement == null) {
-            return null;
-        }
+        if (measurement == null) return null;
         return MeasurementDTO.builder()
             .id(measurement.getId())
-            .stockId(measurement.getStock() != null ? measurement.getStock().getId() : null)
-            .measuredAt(measurement.getMeasuredAt())
-            .temperature(measurement.getTemperature())
+            .sensorReference(measurement.getSensor() != null ? measurement.getSensor().getReference() : null)
+            .sensor(toSensorDTO(measurement.getSensor()))
             .createdAt(measurement.getCreatedAt())
+            .temperature(measurement.getTemperature())
+            .humidity(measurement.getHumidity())
             .build();
     }
 
-    public Measurement toMeasurementEntity(MeasurementDTO dto, Stock stock) {
-        if (dto == null) {
-            return null;
-        }
+    public Measurement toMeasurementEntity(MeasurementDTO dto, Sensor sensor) {
+        if (dto == null) return null;
         return Measurement.builder()
             .id(dto.getId())
-            .stock(stock)
+            .sensor(sensor)
             .temperature(dto.getTemperature())
-            .measuredAt(dto.getMeasuredAt())
+            .humidity(dto.getHumidity())
+            .createdAt(dto.getCreatedAt() != null ? dto.getCreatedAt() : java.time.LocalDateTime.now())
             .build();
     }
 
     public AlertDTO toAlertDTO(Alert alert) {
-        if (alert == null) {
-            return null;
-        }
+        if (alert == null) return null;
         return AlertDTO.builder()
             .id(alert.getId())
-            .stockId(alert.getStock() != null ? alert.getStock().getId() : null)
+            .containerId(alert.getContainer() != null ? alert.getContainer().getId() : null)
+            .container(toContainerDTO(alert.getContainer()))
             .alertedAt(alert.getAlertedAt())
-            .type(alert.getType() != null ? alert.getType().toString() : null)
-            .description(alert.getDescription())
-            .emailSent(alert.getEmailSent())
             .createdAt(alert.getCreatedAt())
+            .emailSent(alert.getEmailSent())
+            .type(alert.getType() != null ? alert.getType().toString() : null)
             .build();
     }
 
     public ConfigurationDTO toConfigurationDTO(Configuration config) {
-        if (config == null) {
-            return null;
-        }
+        if (config == null) return null;
         return ConfigurationDTO.builder()
             .id(config.getId())
-            .countryCode(config.getCountry() != null ? config.getCountry().getCode() : null)
+            .countryId(config.getCountry() != null ? config.getCountry().getId() : null)
             .temperatureIdeal(config.getTemperatureIdeal())
+            .humidityIdeal(config.getHumidityIdeal())
             .temperatureTolerance(config.getTemperatureTolerance())
-            .temperatureUnit(config.getTemperatureUnit().toString())
-            .alertOldLotDays(config.getAlertOldLotDays())
+            .humidityTolerance(config.getHumidityTolerance())
+            .temperatureUnit(config.getTemperatureUnit())
             .createdAt(config.getCreatedAt())
-            .updatedAt(config.getUpdatedAt())
             .build();
     }
 
     public Configuration toConfigurationEntity(ConfigurationDTO dto, Country country) {
-        if (dto == null) {
-            return null;
-        }
+        if (dto == null) return null;
         return Configuration.builder()
             .id(dto.getId())
             .country(country)
             .temperatureIdeal(dto.getTemperatureIdeal())
+            .humidityIdeal(dto.getHumidityIdeal())
             .temperatureTolerance(dto.getTemperatureTolerance())
-            .temperatureUnit(Configuration.TemperatureUnit.valueOf(dto.getTemperatureUnit()))
-            .alertOldLotDays(dto.getAlertOldLotDays())
+            .humidityTolerance(dto.getHumidityTolerance())
+            .temperatureUnit(dto.getTemperatureUnit())
             .build();
     }
 
     public ConfigurationAuditDTO toConfigurationAuditDTO(ConfigurationAudit audit) {
-        if (audit == null) {
-            return null;
-        }
+        if (audit == null) return null;
         return ConfigurationAuditDTO.builder()
             .id(audit.getId())
-            .fieldName(audit.getFieldName())
-            .oldValue(audit.getOldValue())
-            .newValue(audit.getNewValue())
-            .changedBy(audit.getUser() != null ? audit.getUser().getUsername() : null)
             .changedAt(audit.getChangedAt())
+            .configurationId(audit.getConfiguration() != null ? audit.getConfiguration().getId() : null)
+            .fieldName(audit.getFieldName())
+            .newValue(audit.getNewValue())
+            .oldValue(audit.getOldValue())
+            .userId(audit.getUser() != null ? audit.getUser().getId() : null)
+            .build();
+    }
+
+    public Container toContainerEntity(ContainerDTO dto, Warehouse warehouse, Sensor sensor) {
+        if (dto == null) return null;
+        return Container.builder()
+            .id(dto.getId())
+            .reference(dto.getReference())
+            .warehouse(warehouse)
+            .sensor(sensor)
+            .status(dto.getStatus() != null ? Container.Status.valueOf(dto.getStatus()) : null)
+            .entryDate(dto.getEntryDate() != null ? dto.getEntryDate() : java.time.LocalDateTime.now())
+            .exitDate(dto.getExitDate())
             .build();
     }
 }

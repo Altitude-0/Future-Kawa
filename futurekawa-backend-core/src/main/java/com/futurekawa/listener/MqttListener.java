@@ -4,15 +4,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.futurekawa.config.MqttConfig;
 import com.futurekawa.dto.MeasurementDTO;
 import com.futurekawa.entity.Measurement;
-import com.futurekawa.entity.Stock;
+import com.futurekawa.entity.Sensor;
 import com.futurekawa.mapper.EntityMapper;
-import com.futurekawa.repository.StockRepository;
+import com.futurekawa.repository.SensorRepository;
 import com.futurekawa.service.MeasurementService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Component;
-import java.util.UUID;
 
 @Slf4j
 @Component
@@ -20,7 +19,7 @@ import java.util.UUID;
 public class MqttListener {
 
     private final MeasurementService measurementService;
-    private final StockRepository stockRepository;
+    private final SensorRepository sensorRepository;
     private final EntityMapper entityMapper;
     private final ObjectMapper objectMapper;
 
@@ -31,20 +30,20 @@ public class MqttListener {
 
             MeasurementDTO measurementDTO = objectMapper.readValue(message, MeasurementDTO.class);
 
-            if (measurementDTO.getStockId() == null) {
-                log.warn("Measurement message missing stockId: {}", message);
+            if (measurementDTO.getSensorReference() == null) {
+                log.warn("Measurement message missing sensorReference: {}", message);
                 return;
             }
 
-            Stock stock = stockRepository.findById(measurementDTO.getStockId())
+            Sensor sensor = sensorRepository.findByReference(measurementDTO.getSensorReference())
                 .orElseThrow(() -> new IllegalArgumentException(
-                    "Stock not found with ID: " + measurementDTO.getStockId()));
+                    "Sensor not found with reference: " + measurementDTO.getSensorReference()));
 
-            Measurement measurement = entityMapper.toMeasurementEntity(measurementDTO, stock);
+            Measurement measurement = entityMapper.toMeasurementEntity(measurementDTO, sensor);
             measurementService.createMeasurement(measurement);
 
-            log.info("Measurement created successfully from RabbitMQ for stock: {}",
-                measurementDTO.getStockId());
+            log.info("Measurement created successfully from RabbitMQ for sensor: {}",
+                measurementDTO.getSensorReference());
         } catch (IllegalArgumentException e) {
             log.warn("Validation error processing measurement: {}", e.getMessage());
         } catch (Exception e) {

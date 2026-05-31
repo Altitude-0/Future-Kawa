@@ -5,17 +5,17 @@ import lombok.*;
 import java.util.UUID;
 
 @Entity
-@Table(name = "country")
+@Table(name = "sensors_type")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Country {
+public class SensorType {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @Column(name = "code_iso", nullable = false, unique = true)
-    private String codeIso;
+    @Column(name = "sensor_type", nullable = false)
+    private String type;
 }

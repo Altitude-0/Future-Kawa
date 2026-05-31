@@ -11,11 +11,14 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class MeasurementDTO {
+public class ContainerDTO {
     private UUID id;
-    private String sensorReference;
+    private String reference;
+    private UUID warehouseId;
+    private WarehouseDTO warehouse;
+    private UUID idSensor;
     private SensorDTO sensor;
-    private LocalDateTime createdAt;
-    private Float temperature;
-    private Float humidity;
+    private String status;
+    private LocalDateTime entryDate;
+    private LocalDateTime exitDate;
 }

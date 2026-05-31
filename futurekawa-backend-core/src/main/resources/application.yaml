@@ -82,10 +82,12 @@ logging:
 futurekawa:
   country: ${COUNTRY:generic}
   temperatureIdeal: ${TEMPERATURE_IDEAL:28.0}
-  humidityIdeal: ${HUMIDITY_IDEAL:60.0}
   temperatureTolerance: ${TEMPERATURE_TOLERANCE:3.0}
+  humidityIdeal: ${HUMIDITY_IDEAL:60.0}
   humidityTolerance: ${HUMIDITY_TOLERANCE:2.0}
   alertOldLotDays: ${ALERT_OLD_LOT_DAYS:365}
   jwt:
     secret: ${JWT_SECRET:futurekawa-secret-key-for-jwt-token-generation-and-validation-2024}
     expiration: ${JWT_EXPIRATION:86400000}
+  seedData:
+    userPassword: ${SEED_USER_PASSWORD:password123}
