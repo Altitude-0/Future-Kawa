@@ -23,6 +23,7 @@ import java.util.UUID;
 @Transactional
 public class ConfigurationService {
 
+    private static final String ERR_COUNTRY_NOT_FOUND = "Country not found: ";
     private final ConfigurationRepository configRepository;
     private final ConfigurationAuditRepository auditRepository;
     private final CountryRepository countryRepository;
@@ -31,7 +32,7 @@ public class ConfigurationService {
     @Cacheable(value = "configurations", key = "#countryCode")
     public Configuration getConfiguration(String countryCode) {
         Country country = countryRepository.findByCodeIso(countryCode)
-            .orElseThrow(() -> new IllegalArgumentException("Country not found: " + countryCode));
+            .orElseThrow(() -> new IllegalArgumentException(ERR_COUNTRY_NOT_FOUND + countryCode));
 
         return configRepository.findByCountryId(country.getId())
             .orElseGet(() -> buildDefaultConfiguration(country));
@@ -40,7 +41,7 @@ public class ConfigurationService {
     @Cacheable(value = "configurations", key = "#countryId")
     public Configuration getConfigurationByCountryId(UUID countryId) {
         Country country = countryRepository.findById(countryId)
-            .orElseThrow(() -> new IllegalArgumentException("Country not found: " + countryId));
+            .orElseThrow(() -> new IllegalArgumentException(ERR_COUNTRY_NOT_FOUND + countryId));
 
         return configRepository.findByCountryId(countryId)
             .orElseGet(() -> buildDefaultConfiguration(country));
@@ -49,39 +50,38 @@ public class ConfigurationService {
     @CacheEvict(value = "configurations", key = "#countryCode")
     public Configuration updateConfiguration(String countryCode, Configuration newConfig, User updatingUser) {
         Country country = countryRepository.findByCodeIso(countryCode)
-            .orElseThrow(() -> new IllegalArgumentException("Country not found: " + countryCode));
+            .orElseThrow(() -> new IllegalArgumentException(ERR_COUNTRY_NOT_FOUND + countryCode));
 
         Configuration current = configRepository.findByCountryId(country.getId())
             .orElseGet(() -> buildDefaultConfiguration(country));
 
-        // Audit changed fields
-        auditIfChanged(current, updatingUser, "temperatureIdeal",
-            String.valueOf(current.getTemperatureIdeal()), String.valueOf(newConfig.getTemperatureIdeal()));
-        auditIfChanged(current, updatingUser, "humidityIdeal",
-            String.valueOf(current.getHumidityIdeal()), String.valueOf(newConfig.getHumidityIdeal()));
-        auditIfChanged(current, updatingUser, "temperatureTolerance",
-            String.valueOf(current.getTemperatureTolerance()), String.valueOf(newConfig.getTemperatureTolerance()));
-        auditIfChanged(current, updatingUser, "humidityTolerance",
-            String.valueOf(current.getHumidityTolerance()), String.valueOf(newConfig.getHumidityTolerance()));
+        // Audit and update fields
+        auditAndUpdateFields(current, newConfig, updatingUser);
 
-        // Update current
+        return configRepository.save(current);
+    }
+
+    private void auditAndUpdateFields(Configuration current, Configuration newConfig, User user) {
+        auditIfChanged(current, user, "temperatureIdeal", current.getTemperatureIdeal(), newConfig.getTemperatureIdeal());
+        auditIfChanged(current, user, "humidityIdeal", current.getHumidityIdeal(), newConfig.getHumidityIdeal());
+        auditIfChanged(current, user, "temperatureTolerance", current.getTemperatureTolerance(), newConfig.getTemperatureTolerance());
+        auditIfChanged(current, user, "humidityTolerance", current.getHumidityTolerance(), newConfig.getHumidityTolerance());
+
         current.setTemperatureIdeal(newConfig.getTemperatureIdeal());
         current.setHumidityIdeal(newConfig.getHumidityIdeal());
         current.setTemperatureTolerance(newConfig.getTemperatureTolerance());
         current.setHumidityTolerance(newConfig.getHumidityTolerance());
         current.setTemperatureUnit(newConfig.getTemperatureUnit());
-
-        return configRepository.save(current);
     }
 
-    private void auditIfChanged(Configuration current, User user, String fieldName, String oldValue, String newValue) {
+    private void auditIfChanged(Configuration current, User user, String fieldName, Object oldValue, Object newValue) {
         if (oldValue != null && !oldValue.equals(newValue)) {
             ConfigurationAudit audit = ConfigurationAudit.builder()
                 .configuration(current)
                 .user(user)
                 .fieldName(fieldName)
-                .oldValue(oldValue)
-                .newValue(newValue)
+                .oldValue(String.valueOf(oldValue))
+                .newValue(String.valueOf(newValue))
                 .changedAt(LocalDateTime.now())
                 .build();
             auditRepository.save(audit);

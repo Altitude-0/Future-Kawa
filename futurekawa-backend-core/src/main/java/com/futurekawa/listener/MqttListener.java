@@ -30,20 +30,20 @@ public class MqttListener {
 
             MeasurementDTO measurementDTO = objectMapper.readValue(message, MeasurementDTO.class);
 
-            if (measurementDTO.getSensorId() == null) {
-                log.warn("Measurement message missing sensorId: {}", message);
+            if (measurementDTO.getSensorReference() == null) {
+                log.warn("Measurement message missing sensorReference: {}", message);
                 return;
             }
 
-            Sensor sensor = sensorRepository.findById(measurementDTO.getSensorId())
+            Sensor sensor = sensorRepository.findByReference(measurementDTO.getSensorReference())
                 .orElseThrow(() -> new IllegalArgumentException(
-                    "Sensor not found with ID: " + measurementDTO.getSensorId()));
+                    "Sensor not found with reference: " + measurementDTO.getSensorReference()));
 
             Measurement measurement = entityMapper.toMeasurementEntity(measurementDTO, sensor);
             measurementService.createMeasurement(measurement);
 
             log.info("Measurement created successfully from RabbitMQ for sensor: {}",
-                measurementDTO.getSensorId());
+                measurementDTO.getSensorReference());
         } catch (IllegalArgumentException e) {
             log.warn("Validation error processing measurement: {}", e.getMessage());
         } catch (Exception e) {

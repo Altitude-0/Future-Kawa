@@ -28,7 +28,7 @@ public class EntityMapper {
         if (type == null) return null;
         return SensorTypeDTO.builder()
             .id(type.getId())
-            .sensorType(type.getSensorType())
+            .type(type.getType())
             .build();
     }
 
@@ -47,6 +47,7 @@ public class EntityMapper {
         if (container == null) return null;
         return ContainerDTO.builder()
             .id(container.getId())
+            .reference(container.getReference())
             .warehouseId(container.getWarehouse() != null ? container.getWarehouse().getId() : null)
             .warehouse(toWarehouseDTO(container.getWarehouse()))
             .idSensor(container.getSensor() != null ? container.getSensor().getId() : null)
@@ -61,7 +62,7 @@ public class EntityMapper {
         if (measurement == null) return null;
         return MeasurementDTO.builder()
             .id(measurement.getId())
-            .sensorId(measurement.getSensor() != null ? measurement.getSensor().getId() : null)
+            .sensorReference(measurement.getSensor() != null ? measurement.getSensor().getReference() : null)
             .sensor(toSensorDTO(measurement.getSensor()))
             .createdAt(measurement.getCreatedAt())
             .temperature(measurement.getTemperature())
@@ -130,6 +131,19 @@ public class EntityMapper {
             .newValue(audit.getNewValue())
             .oldValue(audit.getOldValue())
             .userId(audit.getUser() != null ? audit.getUser().getId() : null)
+            .build();
+    }
+
+    public Container toContainerEntity(ContainerDTO dto, Warehouse warehouse, Sensor sensor) {
+        if (dto == null) return null;
+        return Container.builder()
+            .id(dto.getId())
+            .reference(dto.getReference())
+            .warehouse(warehouse)
+            .sensor(sensor)
+            .status(dto.getStatus() != null ? Container.Status.valueOf(dto.getStatus()) : null)
+            .entryDate(dto.getEntryDate() != null ? dto.getEntryDate() : java.time.LocalDateTime.now())
+            .exitDate(dto.getExitDate())
             .build();
     }
 }

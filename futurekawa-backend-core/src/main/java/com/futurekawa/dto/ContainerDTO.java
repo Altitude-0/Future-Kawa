@@ -13,6 +13,7 @@ import java.util.UUID;
 @Builder
 public class ContainerDTO {
     private UUID id;
+    private String reference;
     private UUID warehouseId;
     private WarehouseDTO warehouse;
     private UUID idSensor;

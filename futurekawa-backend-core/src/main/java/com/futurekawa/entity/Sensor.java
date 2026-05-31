@@ -25,7 +25,7 @@ public class Sensor {
     @Column(name = "entry_date", nullable = false)
     private LocalDateTime entryDate;
 
-    @Column(nullable = false)
+    @Column(nullable = false, unique = true)
     private String reference;
 
     @OneToOne(mappedBy = "sensor")

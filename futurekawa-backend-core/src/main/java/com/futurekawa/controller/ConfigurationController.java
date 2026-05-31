@@ -19,7 +19,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/v1/configurations")
@@ -79,7 +78,7 @@ public class ConfigurationController {
         List<ConfigurationAuditDTO> audits = configService.getAuditHistory(config.getId())
             .stream()
             .map(mapper::toConfigurationAuditDTO)
-            .collect(Collectors.toList());
+            .toList();
         return ResponseEntity.ok(audits);
     }
 }

@@ -22,6 +22,9 @@ public class Container {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
+    @Column(name = "reference", nullable = false, unique = true)
+    private String reference;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "fk_warehouse", nullable = false)
     private Warehouse warehouse;
@@ -44,8 +47,8 @@ public class Container {
     private List<Alert> alerts;
 
     public enum Status {
-        compliant,
-        warning,
-        outdated
+        COMPLIANT,
+        WARNING,
+        OUTDATED
     }
 }

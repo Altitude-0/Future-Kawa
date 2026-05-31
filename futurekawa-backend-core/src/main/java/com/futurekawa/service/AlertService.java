@@ -37,7 +37,7 @@ public class AlertService {
 
         // Update container status based on alerts
         if (!newAlerts.isEmpty()) {
-            containerService.updateContainerStatus(container.getId(), Container.Status.warning);
+            containerService.updateContainerStatus(container.getId(), Container.Status.WARNING);
         }
     }
 

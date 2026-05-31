@@ -23,7 +23,7 @@ public class ContainerService {
             container.setEntryDate(LocalDateTime.now());
         }
         if (container.getStatus() == null) {
-            container.setStatus(Container.Status.compliant);
+            container.setStatus(Container.Status.COMPLIANT);
         }
         return containerRepository.save(container);
     }

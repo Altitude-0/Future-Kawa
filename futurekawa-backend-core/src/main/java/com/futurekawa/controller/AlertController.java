@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/v1/alerts")
@@ -27,7 +26,7 @@ public class AlertController {
     @Operation(summary = "List all alerts")
     public ResponseEntity<List<AlertDTO>> getAllAlerts() {
         List<Alert> alerts = alertService.getAllAlerts();
-        return ResponseEntity.ok(alerts.stream().map(mapper::toAlertDTO).collect(Collectors.toList()));
+        return ResponseEntity.ok(alerts.stream().map(mapper::toAlertDTO).toList());
     }
 
     @GetMapping("/{id}")
@@ -42,7 +41,7 @@ public class AlertController {
     @Operation(summary = "Get all alerts for a specific container")
     public ResponseEntity<List<AlertDTO>> getAlertsByContainer(@PathVariable UUID containerId) {
         List<Alert> alerts = alertService.getAlertsByContainer(containerId);
-        return ResponseEntity.ok(alerts.stream().map(mapper::toAlertDTO).collect(Collectors.toList()));
+        return ResponseEntity.ok(alerts.stream().map(mapper::toAlertDTO).toList());
     }
 
     @PatchMapping("/{id}/mark-sent")

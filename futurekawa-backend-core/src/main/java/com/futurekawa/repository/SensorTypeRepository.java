@@ -9,5 +9,5 @@ import java.util.UUID;
 
 @Repository
 public interface SensorTypeRepository extends JpaRepository<SensorType, UUID> {
-    Optional<SensorType> findBySensorType(String sensorType);
+    Optional<SensorType> findByType(String type);
 }

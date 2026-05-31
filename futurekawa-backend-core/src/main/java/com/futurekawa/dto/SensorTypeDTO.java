@@ -12,5 +12,5 @@ import java.util.UUID;
 @Builder
 public class SensorTypeDTO {
     private UUID id;
-    private String sensorType;
+    private String type;
 }

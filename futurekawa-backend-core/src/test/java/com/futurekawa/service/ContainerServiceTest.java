@@ -45,7 +45,7 @@ class ContainerServiceTest {
         testContainer = Container.builder()
             .id(testId)
             .warehouse(testWarehouse)
-            .status(Container.Status.compliant)
+            .status(Container.Status.COMPLIANT)
             .entryDate(LocalDateTime.now())
             .build();
     }
@@ -58,7 +58,7 @@ class ContainerServiceTest {
 
         assertThat(result).isNotNull();
         assertThat(result.getId()).isEqualTo(testId);
-        assertThat(result.getStatus()).isEqualTo(Container.Status.compliant);
+        assertThat(result.getStatus()).isEqualTo(Container.Status.COMPLIANT);
         verify(containerRepository, times(1)).save(any(Container.class));
     }
 
@@ -87,7 +87,7 @@ class ContainerServiceTest {
         Container container2 = Container.builder()
             .id(UUID.randomUUID())
             .warehouse(testWarehouse)
-            .status(Container.Status.warning)
+            .status(Container.Status.WARNING)
             .build();
 
         List<Container> containers = Arrays.asList(testContainer, container2);
@@ -105,7 +105,7 @@ class ContainerServiceTest {
         Container updatedContainer = Container.builder()
             .id(testId)
             .warehouse(testWarehouse)
-            .status(Container.Status.warning)
+            .status(Container.Status.WARNING)
             .entryDate(testContainer.getEntryDate())
             .build();
 
@@ -115,7 +115,7 @@ class ContainerServiceTest {
         Container result = containerService.updateContainer(testId, updatedContainer);
 
         assertThat(result).isNotNull();
-        assertThat(result.getStatus()).isEqualTo(Container.Status.warning);
+        assertThat(result.getStatus()).isEqualTo(Container.Status.WARNING);
         verify(containerRepository, times(1)).findById(testId);
         verify(containerRepository, times(1)).save(any(Container.class));
     }

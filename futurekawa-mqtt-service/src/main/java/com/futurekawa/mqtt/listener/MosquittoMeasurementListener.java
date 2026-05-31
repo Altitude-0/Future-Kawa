@@ -19,11 +19,13 @@ import java.util.regex.Pattern;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class MosquittoTemperatureListener {
+public class MosquittoMeasurementListener {
 
     private final RabbitTemplate rabbitTemplate;
     private final ObjectMapper objectMapper;
     private static final Pattern TOPIC_PATTERN = Pattern.compile("sensors/([^/]+)/metrics");
+    private static final String FIELD_TEMPERATURE = "temperature";
+    private static final String FIELD_HUMIDITY = "humidity";
 
     @ServiceActivator(inputChannel = "mqttInputChannel")
     public void handleMessage(Message<?> message) {
@@ -33,9 +35,9 @@ public class MosquittoTemperatureListener {
 
             log.debug("Received message from Mosquitto - Topic: {}, Payload: {}", topic, payload);
 
-            String sensorId = extractSensorId(topic);
-            if (sensorId == null) {
-                log.warn("Could not extract sensorId from topic: {}", topic);
+            String sensorReference = extractSensorId(topic);
+            if (sensorReference == null) {
+                log.warn("Could not extract sensorReference from topic: {}", topic);
                 return;
             }
 
@@ -44,16 +46,16 @@ public class MosquittoTemperatureListener {
             
             Map<String, Object> measurementData = new HashMap<>();
             measurementData.put("id", UUID.randomUUID().toString());
-            measurementData.put("sensorId", sensorId);
-            measurementData.put("temperature", payloadMap.get("temperature"));
-            measurementData.put("humidity", payloadMap.get("humidity"));
+            measurementData.put("sensorReference", sensorReference);
+            measurementData.put(FIELD_TEMPERATURE, payloadMap.get(FIELD_TEMPERATURE));
+            measurementData.put(FIELD_HUMIDITY, payloadMap.get(FIELD_HUMIDITY));
             measurementData.put("createdAt", LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME));
 
             String jsonMessage = objectMapper.writeValueAsString(measurementData);
             rabbitTemplate.convertAndSend(RabbitConfig.MEASUREMENTS_QUEUE, jsonMessage);
 
-            log.info("Measurement published to RabbitMQ - SensorId: {}, Temp: {}, Hum: {}",
-                sensorId, payloadMap.get("temperature"), payloadMap.get("humidity"));
+            log.info("Measurement published to RabbitMQ - SensorRef: {}, Temp: {}, Hum: {}",
+                sensorReference, payloadMap.get(FIELD_TEMPERATURE), payloadMap.get(FIELD_HUMIDITY));
         } catch (Exception e) {
             log.error("Error processing MQTT message", e);
         }

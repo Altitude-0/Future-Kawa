@@ -2,6 +2,8 @@ package com.futurekawa.controller;
 
 import com.futurekawa.dto.ContainerDTO;
 import com.futurekawa.entity.Container;
+import com.futurekawa.entity.Sensor;
+import com.futurekawa.entity.Warehouse;
 import com.futurekawa.mapper.EntityMapper;
 import com.futurekawa.service.ContainerService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -14,7 +16,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/v1/containers")
@@ -27,8 +28,21 @@ public class ContainerController {
 
     @PostMapping
     @Operation(summary = "Create a new container")
-    public ResponseEntity<ContainerDTO> createContainer(@Valid @RequestBody Container container) {
-        Container created = containerService.createContainer(container);
+    public ResponseEntity<ContainerDTO> createContainer(@Valid @RequestBody ContainerDTO containerDto) {
+        Warehouse warehouseRef = null;
+        if (containerDto.getWarehouseId() != null) {
+            warehouseRef = new Warehouse();
+            warehouseRef.setId(containerDto.getWarehouseId());
+        }
+        
+        Sensor sensorRef = null;
+        if (containerDto.getIdSensor() != null) {
+            sensorRef = new Sensor();
+            sensorRef.setId(containerDto.getIdSensor());
+        }
+
+        Container containerToCreate = mapper.toContainerEntity(containerDto, warehouseRef, sensorRef);
+        Container created = containerService.createContainer(containerToCreate);
         return ResponseEntity.status(HttpStatus.CREATED).body(mapper.toContainerDTO(created));
     }
 
@@ -36,7 +50,7 @@ public class ContainerController {
     @Operation(summary = "List all containers")
     public ResponseEntity<List<ContainerDTO>> getAllContainers() {
         List<Container> containers = containerService.getAllContainers();
-        return ResponseEntity.ok(containers.stream().map(mapper::toContainerDTO).collect(Collectors.toList()));
+        return ResponseEntity.ok(containers.stream().map(mapper::toContainerDTO).toList());
     }
 
     @GetMapping("/{id}")
@@ -54,8 +68,21 @@ public class ContainerController {
     @Operation(summary = "Update container")
     public ResponseEntity<ContainerDTO> updateContainer(
             @PathVariable UUID id,
-            @Valid @RequestBody Container updatedContainer) {
+            @Valid @RequestBody ContainerDTO updatedContainerDto) {
         try {
+            Warehouse warehouseRef = null;
+            if (updatedContainerDto.getWarehouseId() != null) {
+                warehouseRef = new Warehouse();
+                warehouseRef.setId(updatedContainerDto.getWarehouseId());
+            }
+            
+            Sensor sensorRef = null;
+            if (updatedContainerDto.getIdSensor() != null) {
+                sensorRef = new Sensor();
+                sensorRef.setId(updatedContainerDto.getIdSensor());
+            }
+
+            Container updatedContainer = mapper.toContainerEntity(updatedContainerDto, warehouseRef, sensorRef);
             Container container = containerService.updateContainer(id, updatedContainer);
             return ResponseEntity.ok(mapper.toContainerDTO(container));
         } catch (RuntimeException e) {

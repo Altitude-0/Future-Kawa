@@ -29,55 +29,54 @@ public class DefaultAlertingStrategy implements AlertingStrategy {
         String countryCode = container.getWarehouse().getCountry().getCodeIso();
         Configuration config = configurationService.getConfiguration(countryCode);
 
-        // Check 1: Container expiry (1 year according to Modification.md)
-        long daysInStorage = ChronoUnit.DAYS.between(container.getEntryDate(), LocalDateTime.now());
-        if (daysInStorage > 365) {
-            Alert expiryAlert = Alert.builder()
-                .container(container)
-                .alertedAt(LocalDateTime.now())
-                .type(Alert.AlertType.OUTDATED_CONTAINER)
-                .emailSent(false)
-                .build();
-            alerts.add(expiryAlert);
-        }
-
-        // Check 2: Conditions out of range
-        if (container.getSensor() != null) {
-            Optional<Measurement> latestMeasurement = measurementRepository.findLatestBySensorId(container.getSensor().getId());
-            if (latestMeasurement.isPresent()) {
-                Measurement measurement = latestMeasurement.get();
-                
-                // Temperature check
-                Float tempIdeal = config.getTemperatureIdeal();
-                Float tempTolerance = config.getTemperatureTolerance();
-                if (tempIdeal != null && tempTolerance != null) {
-                    if (Math.abs(measurement.getTemperature() - tempIdeal) > tempTolerance) {
-                        alerts.add(Alert.builder()
-                            .container(container)
-                            .alertedAt(LocalDateTime.now())
-                            .type(Alert.AlertType.TEMPERATURE_OUT_OF_RANGE)
-                            .emailSent(false)
-                            .build());
-                    }
-                }
-
-                // Humidity check
-                Float humIdeal = config.getHumidityIdeal();
-                Float humTolerance = config.getHumidityTolerance();
-                if (humIdeal != null && humTolerance != null) {
-                    if (Math.abs(measurement.getHumidity() - humIdeal) > humTolerance) {
-                        alerts.add(Alert.builder()
-                            .container(container)
-                            .alertedAt(LocalDateTime.now())
-                            .type(Alert.AlertType.HUMIDITY_OUT_OF_RANGE)
-                            .emailSent(false)
-                            .build());
-                    }
-                }
-            }
-        }
+        evaluateExpiry(container, alerts);
+        evaluateConditions(container, config, alerts);
 
         return alerts;
+    }
+
+    private void evaluateExpiry(Container container, List<Alert> alerts) {
+        long daysInStorage = ChronoUnit.DAYS.between(container.getEntryDate(), LocalDateTime.now());
+        if (daysInStorage > 365) {
+            alerts.add(createAlert(container, Alert.AlertType.OUTDATED_CONTAINER));
+        }
+    }
+
+    private void evaluateConditions(Container container, Configuration config, List<Alert> alerts) {
+        if (container.getSensor() == null) {
+            return;
+        }
+
+        measurementRepository.findLatestBySensorId(container.getSensor().getId())
+            .ifPresent(measurement -> {
+                evaluateTemperature(container, measurement, config, alerts);
+                evaluateHumidity(container, measurement, config, alerts);
+            });
+    }
+
+    private void evaluateTemperature(Container container, Measurement measurement, Configuration config, List<Alert> alerts) {
+        Float tempIdeal = config.getTemperatureIdeal();
+        Float tempTolerance = config.getTemperatureTolerance();
+        if (tempIdeal != null && tempTolerance != null && Math.abs(measurement.getTemperature() - tempIdeal) > tempTolerance) {
+            alerts.add(createAlert(container, Alert.AlertType.TEMPERATURE_OUT_OF_RANGE));
+        }
+    }
+
+    private void evaluateHumidity(Container container, Measurement measurement, Configuration config, List<Alert> alerts) {
+        Float humIdeal = config.getHumidityIdeal();
+        Float humTolerance = config.getHumidityTolerance();
+        if (humIdeal != null && humTolerance != null && Math.abs(measurement.getHumidity() - humIdeal) > humTolerance) {
+            alerts.add(createAlert(container, Alert.AlertType.HUMIDITY_OUT_OF_RANGE));
+        }
+    }
+
+    private Alert createAlert(Container container, Alert.AlertType type) {
+        return Alert.builder()
+            .container(container)
+            .alertedAt(LocalDateTime.now())
+            .type(type)
+            .emailSent(false)
+            .build();
     }
 
     @Override

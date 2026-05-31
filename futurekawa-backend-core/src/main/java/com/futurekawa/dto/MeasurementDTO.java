@@ -13,7 +13,7 @@ import java.util.UUID;
 @Builder
 public class MeasurementDTO {
     private UUID id;
-    private UUID sensorId;
+    private String sensorReference;
     private SensorDTO sensor;
     private LocalDateTime createdAt;
     private Float temperature;

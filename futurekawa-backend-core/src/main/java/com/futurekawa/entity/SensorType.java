@@ -17,5 +17,5 @@ public class SensorType {
     private UUID id;
 
     @Column(name = "sensor_type", nullable = false)
-    private String sensorType;
+    private String type;
 }

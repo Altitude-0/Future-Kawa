@@ -18,10 +18,16 @@ public class FuturekawaProperties {
     private Long alertOldLotDays = 365L;
 
     private JwtProperties jwt = new JwtProperties();
+    private SeedDataProperties seedData = new SeedDataProperties();
 
     @Data
     public static class JwtProperties {
         private String secret = "futurekawa-secret-key-for-jwt-token-generation-and-validation-2024";
         private Long expiration = 86400000L;
+    }
+
+    @Data
+    public static class SeedDataProperties {
+        private String userPassword = "password123";
     }
 }
