@@ -81,6 +81,8 @@ logging:
 # FutureKawa Custom Configuration
 futurekawa:
   country: ${COUNTRY:generic}
+  alert:
+    recipient: ${ALERT_RECIPIENT:alerts@futurekawa.local}
   temperatureIdeal: ${TEMPERATURE_IDEAL:28.0}
   temperatureTolerance: ${TEMPERATURE_TOLERANCE:3.0}
   humidityIdeal: ${HUMIDITY_IDEAL:60.0}

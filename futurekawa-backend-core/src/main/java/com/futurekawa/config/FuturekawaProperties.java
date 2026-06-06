@@ -19,6 +19,7 @@ public class FuturekawaProperties {
 
     private JwtProperties jwt = new JwtProperties();
     private SeedDataProperties seedData = new SeedDataProperties();
+    private AlertProperties alert = new AlertProperties();
 
     @Data
     public static class JwtProperties {
@@ -29,5 +30,11 @@ public class FuturekawaProperties {
     @Data
     public static class SeedDataProperties {
         private String userPassword = "password123";
+    }
+
+    @Data
+    public static class AlertProperties {
+        /** Destinataire global des mails d'alerte (MVP). Surchargé par ALERT_RECIPIENT. */
+        private String recipient = "alerts@futurekawa.local";
     }
 }

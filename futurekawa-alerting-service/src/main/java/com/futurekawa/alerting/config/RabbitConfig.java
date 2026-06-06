@@ -1,22 +1,20 @@
-package com.futurekawa.config;
+package com.futurekawa.alerting.config;
 
 import org.springframework.amqp.core.Queue;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+/**
+ * Déclare les queues partagées avec backend-core. Les noms doivent rester
+ * strictement identiques de part et d'autre (contrat de messagerie).
+ */
 @Configuration
-public class MqttConfig {
+public class RabbitConfig {
 
-    public static final String MEASUREMENTS_QUEUE = "measurements";
-    /** Événements d'alerte émis vers le service de notification (alerting-service). */
+    /** Queue d'entrée : événements d'alerte à notifier. */
     public static final String ALERTS_QUEUE = "alerts";
-    /** Confirmations d'envoi de mail renvoyées par le service de notification. */
+    /** Queue de sortie : confirmations d'envoi renvoyées à backend-core. */
     public static final String ALERT_CONFIRMATIONS_QUEUE = "alert-confirmations";
-
-    @Bean
-    public Queue measurementsQueue() {
-        return new Queue(MEASUREMENTS_QUEUE, true);
-    }
 
     @Bean
     public Queue alertsQueue() {

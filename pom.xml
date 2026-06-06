@@ -22,6 +22,7 @@
     <modules>
         <module>futurekawa-backend-core</module>
         <module>futurekawa-mqtt-service</module>
+        <module>futurekawa-alerting-service</module>
     </modules>
 
     <properties>
