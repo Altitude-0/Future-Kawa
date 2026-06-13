@@ -7,6 +7,7 @@ import com.futurekawa.entity.Measurement;
 import com.futurekawa.entity.Sensor;
 import com.futurekawa.mapper.EntityMapper;
 import com.futurekawa.repository.SensorRepository;
+import com.futurekawa.service.AlertService;
 import com.futurekawa.service.MeasurementService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -22,6 +23,7 @@ public class MqttListener {
     private final SensorRepository sensorRepository;
     private final EntityMapper entityMapper;
     private final ObjectMapper objectMapper;
+    private final AlertService alertService;
 
     @RabbitListener(queues = MqttConfig.MEASUREMENTS_QUEUE)
     public void receiveMeasurement(String message) {
@@ -44,6 +46,9 @@ public class MqttListener {
 
             log.info("Measurement created successfully from RabbitMQ for sensor: {}",
                 measurementDTO.getSensorReference());
+
+            // Évalue les alertes (température) pour le conteneur rattaché à ce capteur.
+            alertService.evaluateAlertsForSensor(sensor.getId());
         } catch (IllegalArgumentException e) {
             log.warn("Validation error processing measurement: {}", e.getMessage());
         } catch (Exception e) {
