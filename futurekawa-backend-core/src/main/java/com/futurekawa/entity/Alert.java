@@ -3,6 +3,7 @@ package com.futurekawa.entity;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.UUID;
 
 @Entity
@@ -30,7 +31,10 @@ public class Alert {
 
     @Column(name = "created_at", nullable = false, updatable = false)
     @Builder.Default
-    private LocalDateTime createdAt = LocalDateTime.now();
+    private LocalDateTime createdAt = LocalDateTime.now(ZoneId.systemDefault());
+
+    @Column(name = "description", nullable = false)
+    private String description;
 
     @Column(name = "email_sent", nullable = false)
     @Builder.Default

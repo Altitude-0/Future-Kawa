@@ -36,11 +36,11 @@ public class DataInitializer implements CommandLineRunner {
             // 3. Execute the rest of the seed data from SQL
             try {
                 ResourceDatabasePopulator populator = new ResourceDatabasePopulator();
-                populator.addScript(new ClassPathResource("db/scripts/seed_data.sql"));
+                populator.addScript(new ClassPathResource(properties.getInitScriptPath()));
                 populator.execute(dataSource);
-                log.info("✅ Seed data SQL executed successfully!");
+                log.info("✅ Seed data SQL ({}) executed successfully!", properties.getInitScriptPath());
             } catch (Exception e) {
-                log.error("❌ Error while executing seed_data.sql: {}", e.getMessage(), e);
+                log.error("❌ Error while executing {}: {}", properties.getInitScriptPath(), e.getMessage(), e);
             }
         } else {
             log.info("ℹ️ Database already contains data, skipping initialization.");

@@ -7,7 +7,9 @@ import com.futurekawa.service.ConfigurationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
+import java.time.Clock;
 import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
@@ -20,6 +22,7 @@ public class DefaultAlertingStrategy implements AlertingStrategy {
     private final MeasurementRepository measurementRepository;
     private final ConfigurationService configurationService;
     private final FuturekawaProperties properties;
+    private final Clock clock;
 
     @Override
     public List<Alert> evaluateAlerts(Container container) {
@@ -36,7 +39,14 @@ public class DefaultAlertingStrategy implements AlertingStrategy {
     }
 
     private void evaluateExpiry(Container container, List<Alert> alerts) {
-        long daysInStorage = ChronoUnit.DAYS.between(container.getEntryDate(), LocalDateTime.now());
+        if (container.getEntryDate() == null) {
+            return;
+        }
+
+        ZonedDateTime entryZoned = container.getEntryDate().atZone(clock.getZone());
+        ZonedDateTime nowZoned = ZonedDateTime.now(clock);
+
+        long daysInStorage = ChronoUnit.DAYS.between(entryZoned, nowZoned);
         if (daysInStorage > 365) {
             alerts.add(createAlert(container, Alert.AlertType.OUTDATED_CONTAINER));
         }
@@ -73,10 +83,20 @@ public class DefaultAlertingStrategy implements AlertingStrategy {
     private Alert createAlert(Container container, Alert.AlertType type) {
         return Alert.builder()
             .container(container)
-            .alertedAt(LocalDateTime.now())
+            .alertedAt(LocalDateTime.now(clock))
             .type(type)
+            .description(buildDescription(type))
             .emailSent(false)
             .build();
+    }
+
+    private String buildDescription(Alert.AlertType type) {
+        return switch (type) {
+            case TEMPERATURE_OUT_OF_RANGE -> "Température hors de la plage tolérée";
+            case HUMIDITY_OUT_OF_RANGE -> "Humidité hors de la plage tolérée";
+            case OUTDATED_CONTAINER -> "Conteneur stocké depuis plus de 365 jours";
+            case OTHER -> "Alerte";
+        };
     }
 
     @Override

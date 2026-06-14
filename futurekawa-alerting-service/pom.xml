@@ -12,9 +12,9 @@
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <artifactId>futurekawa-mqtt-service</artifactId>
-    <name>FutureKawa MQTT Service</name>
-    <description>MQTT to RabbitMQ bridge service for IoT sensor data</description>
+    <artifactId>futurekawa-alerting-service</artifactId>
+    <name>FutureKawa Alerting Service</name>
+    <description>Stateless notification service: consumes alert events and sends emails</description>
 
     <dependencies>
         <!-- Spring Boot Starters -->
@@ -33,21 +33,15 @@
             <artifactId>spring-boot-starter-amqp</artifactId>
         </dependency>
 
+        <!-- Email -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-mail</artifactId>
+        </dependency>
+
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-actuator</artifactId>
-        </dependency>
-
-        <!-- Spring Integration MQTT -->
-        <dependency>
-            <groupId>org.springframework.integration</groupId>
-            <artifactId>spring-integration-mqtt</artifactId>
-        </dependency>
-
-        <!-- MQTT Client -->
-        <dependency>
-            <groupId>org.eclipse.paho</groupId>
-            <artifactId>org.eclipse.paho.client.mqttv3</artifactId>
         </dependency>
 
         <!-- Lombok -->
@@ -61,12 +55,6 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
-            <scope>test</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.springframework.integration</groupId>
-            <artifactId>spring-integration-test</artifactId>
             <scope>test</scope>
         </dependency>
     </dependencies>

@@ -7,7 +7,7 @@
 
     <groupId>com.futurekawa</groupId>
     <artifactId>futurekawa-parent</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
+    <version>1.0.0</version>
     <packaging>pom</packaging>
     <name>FutureKawa Parent</name>
     <description>Parent POM for FutureKawa microservices architecture</description>
@@ -22,6 +22,7 @@
     <modules>
         <module>futurekawa-backend-core</module>
         <module>futurekawa-mqtt-service</module>
+        <module>futurekawa-alerting-service</module>
     </modules>
 
     <properties>

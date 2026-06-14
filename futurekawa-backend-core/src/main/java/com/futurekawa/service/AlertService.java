@@ -2,7 +2,9 @@ package com.futurekawa.service;
 
 import com.futurekawa.entity.Alert;
 import com.futurekawa.entity.Container;
+import com.futurekawa.messaging.AlertEventPublisher;
 import com.futurekawa.repository.AlertRepository;
+import com.futurekawa.repository.ContainerRepository;
 import com.futurekawa.strategy.AlertingStrategy;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -20,6 +22,18 @@ public class AlertService {
     private final AlertRepository alertRepository;
     private final AlertingStrategy alertingStrategy;
     private final ContainerService containerService;
+    private final ContainerRepository containerRepository;
+    private final AlertEventPublisher alertEventPublisher;
+
+    /**
+     * Point d'entrée appelé après la persistance d'une mesure : résout le conteneur
+     * rattaché au capteur puis déclenche l'évaluation des alertes. Tout se fait dans
+     * cette transaction pour garantir le chargement lazy (warehouse, country, mesures).
+     */
+    public void evaluateAlertsForSensor(UUID sensorId) {
+        containerRepository.findBySensorId(sensorId)
+            .ifPresent(this::evaluateContainerAlerts);
+    }
 
     public void evaluateContainerAlerts(Container container) {
         List<Alert> newAlerts = alertingStrategy.evaluateAlerts(container);
@@ -32,6 +46,11 @@ public class AlertService {
             if (!exists) {
                 alertRepository.save(newAlert);
                 container.getAlerts().add(newAlert);
+
+                // MVP : seules les alertes de température déclenchent une notification mail.
+                if (newAlert.getType() == Alert.AlertType.TEMPERATURE_OUT_OF_RANGE) {
+                    alertEventPublisher.publishTemperatureAlert(newAlert);
+                }
             }
         }
 
