@@ -16,6 +16,7 @@ public class FuturekawaProperties {
     private Float temperatureTolerance = 3.0f;
     private Float humidityTolerance = 2.0f;
     private Long alertOldLotDays = 365L;
+    private String initScriptPath = "db/scripts/seed_data.sql";
 
     private JwtProperties jwt = new JwtProperties();
     private SeedDataProperties seedData = new SeedDataProperties();

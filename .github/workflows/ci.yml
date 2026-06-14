@@ -2,8 +2,8 @@ name: Build and Push to GHCR
 
 on:
   push:
-    branches:
-      - main
+    tags:
+      - 'v*.*.*'
   pull_request:
     branches:
       - main
@@ -81,6 +81,15 @@ jobs:
             -f futurekawa-mqtt-service/Dockerfile .
           docker push ${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER_LOWER }}/futurekawa-mqtt-service:latest
           docker push ${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER_LOWER }}/futurekawa-mqtt-service:${{ github.sha }}
+
+      - name: Build and push Alerting Service image
+        run: |
+          docker build \
+            -t ${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER_LOWER }}/futurekawa-alerting-service:latest \
+            -t ${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER_LOWER }}/futurekawa-alerting-service:${{ github.sha }} \
+            -f futurekawa-alerting-service/Dockerfile .
+          docker push ${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER_LOWER }}/futurekawa-alerting-service:latest
+          docker push ${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER_LOWER }}/futurekawa-alerting-service:${{ github.sha }}
 
   notify-discord:
     needs: [build-and-test, deploy-maven, build-and-push]
