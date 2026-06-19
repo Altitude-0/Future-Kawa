@@ -17,7 +17,7 @@
   WORKDIR /app    
                                                                                                                            
   # Copier le JAR depuis l'étape de build
-  COPY --from=builder /build/futurekawa-backend-core/target/*.jar app.jar
+  COPY --from=builder /build/futurekawa-backend-core/target/*-exec.jar app.jar
                                                                                                                            
   # Expose le port
   EXPOSE 8080                                                                                                              

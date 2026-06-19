@@ -19,7 +19,7 @@ FROM eclipse-temurin:17-jre
 WORKDIR /app
 
 # Copier le JAR depuis l'étape de build
-COPY --from=builder /build/futurekawa-mqtt-service/target/*.jar app.jar
+COPY --from=builder /build/futurekawa-mqtt-service/target/*-exec.jar app.jar
 
 # Expose le port
 EXPOSE 8081
