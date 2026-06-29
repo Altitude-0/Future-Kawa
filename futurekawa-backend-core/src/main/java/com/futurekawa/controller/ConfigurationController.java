@@ -29,6 +29,7 @@ public class ConfigurationController {
     private final ConfigurationService configService;
     private final EntityMapper mapper;
     private final CountryRepository countryRepository;
+    private final com.futurekawa.repository.UserRepository userRepository;
 
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
@@ -64,7 +65,10 @@ public class ConfigurationController {
 
         Configuration config = configService.getConfiguration(countryCode);
         Configuration newConfig = mapper.toConfigurationEntity(newConfigDTO, config.getCountry());
-        User currentUser = (User) authentication.getPrincipal();
+        
+        String username = authentication.getName();
+        User currentUser = userRepository.findByUsername(username)
+            .orElseThrow(() -> new IllegalArgumentException("User not found: " + username));
 
         Configuration updated = configService.updateConfiguration(countryCode, newConfig, currentUser);
         return ResponseEntity.ok(mapper.toConfigurationDTO(updated));
