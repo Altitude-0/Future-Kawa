@@ -7,7 +7,7 @@
 
     <groupId>com.futurekawa</groupId>
     <artifactId>futurekawa-parent</artifactId>
-    <version>1.0.2-SNAPSHOT</version>
+    <version>1.2.0</version>
     <packaging>pom</packaging>
     <name>FutureKawa Parent</name>
     <description>Parent POM for FutureKawa microservices architecture</description>
