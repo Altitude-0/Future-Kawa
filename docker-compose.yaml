@@ -70,7 +70,7 @@ services:
   # MQTT Service (Mosquitto to RabbitMQ Bridge)
   mqtt-service:
     build:
-      context: ..
+      context: .
       dockerfile: futurekawa-mqtt-service/Dockerfile
     container_name: futurekawa-mqtt-service
     environment:
@@ -94,7 +94,7 @@ services:
   # Backend Core Spring Boot Application
   backend:
     build:
-      context: ..
+      context: .
       dockerfile: futurekawa-backend-core/Dockerfile
     container_name: futurekawa-backend-core
     environment:
@@ -127,7 +127,7 @@ services:
   # Alerting Service (consomme les alertes -> envoie les mails)
   alerting-service:
     build:
-      context: ..
+      context: .
       dockerfile: futurekawa-alerting-service/Dockerfile
     container_name: futurekawa-alerting-service
     environment:
