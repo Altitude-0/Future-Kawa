@@ -106,7 +106,7 @@ jobs:
     needs: [build-and-test, deploy-maven, build-and-push]
     runs-on: ubuntu-latest
     name: Notify Discord
-    if: success()
+    if: always() && !contains(needs.*.result, 'failure') && !contains(needs.*.result, 'cancelled')
     steps:
       - name: Send Discord notification
         run: |
